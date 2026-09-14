@@ -8,7 +8,7 @@ package design.patterns.creational.singleton;
  * - Nếu có rồi thì trả về.
  * 
  * VẤN ĐỀ:
- * Cách này KHÔNG a toàn khi chạy đa luồng (Non Thread-safe).
+ * Cách này KHÔNG an toàn khi chạy đa luồng (Non Thread-safe).
  * Nếu 2 luồng cùng gọi getInstance() cùng lúc khi instance == null,
  * cả 2 sẽ cùng lọt vào trong và tạo ra 2 object khác nhau.
  */
