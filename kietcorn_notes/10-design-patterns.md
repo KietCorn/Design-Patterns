@@ -30,14 +30,12 @@ Tưởng tượng một đất nước chỉ có **một Tổng thống** tại 
 - **Cách Singleton giải quyết**: `ConfigManager` được thiết kế Singleton — đọc file config một lần duy nhất khi khởi tạo, sau đó mọi nơi đều lấy từ cùng một instance đã cache sẵn.
 
 ```java
-// ConfigManager.java
 public class ConfigManager {
     private static ConfigManager instance;
     private String dbHost;
     private int dbPort;
 
     private ConfigManager() {
-        // Giả lập đọc từ file config
         this.dbHost = "localhost";
         this.dbPort = 5432;
         System.out.println("ConfigManager: Đọc file config lần đầu và duy nhất.");
@@ -68,9 +66,6 @@ public class Demo {
 
         System.out.println("DB Host: " + config1.getDbHost());
         // Output: DB Host: localhost
-
-        System.out.println("DB Port: " + config2.getDbPort());
-        // Output: DB Port: 5432
     }
 }
 ```
@@ -93,7 +88,7 @@ Hãy hình dung bạn đến một **tiệm bánh nhượng quyền** (franchise
 
 **Ví dụ 1**
 
-- **Bài toán**: Ứng dụng gửi thông báo có thể gửi qua Email hoặc SMS. Nếu dùng `if-else` hay `switch-case` để quyết định tạo object gửi tin, mỗi lần thêm kênh mới (push notification, Zalo...) phải sửa vào đúng đoạn `if-else` đó — vi phạm Open/Closed Principle.
+- **Bài toán**: Ứng dụng gửi thông báo có thể gửi qua Email hoặc SMS. Nếu dùng `if-else` hay `switch-case` để quyết định tạo object gửi tin, mỗi lần thêm kênh mới phải sửa vào đúng đoạn `if-else` đó — vi phạm Open/Closed Principle.
 - **Cách Factory Method giải quyết**: Tạo abstract class `NotificationSender` với factory method `createNotification()`. Các subclass `EmailSender`, `SmsSender` override lại method này để trả về đúng loại notification của mình.
 
 **Ví dụ 2**
@@ -107,31 +102,22 @@ Hãy hình dung bạn đến một **tiệm bánh nhượng quyền** (franchise
 - **Cách Factory Method giải quyết**: Mỗi `EnemySpawner` subclass chịu trách nhiệm tạo một loại kẻ địch. Code game chỉ làm việc với abstract `EnemySpawner`, không cần biết loại cụ thể.
 
 ```java
-// Enemy.java
 public interface Enemy {
     void attack();
 }
 
-// Zombie.java
 public class Zombie implements Enemy {
-    public void attack() {
-        System.out.println("Zombie tấn công: Cắn!");
-    }
+    public void attack() { System.out.println("Zombie tấn công: Cắn!"); }
 }
 
-// Robot.java
 public class Robot implements Enemy {
-    public void attack() {
-        System.out.println("Robot tấn công: Bắn laser!");
-    }
+    public void attack() { System.out.println("Robot tấn công: Bắn laser!"); }
 }
 
-// EnemySpawner.java - Creator (abstract)
+// Creator (abstract)
 public abstract class EnemySpawner {
-    // Factory Method
-    public abstract Enemy createEnemy();
+    public abstract Enemy createEnemy(); // Factory Method
 
-    // Template method dùng factory method
     public void spawnAndAttack() {
         Enemy enemy = createEnemy();
         System.out.println("Kẻ địch xuất hiện!");
@@ -139,26 +125,19 @@ public abstract class EnemySpawner {
     }
 }
 
-// ZombieSpawner.java - Concrete Creator
+// Concrete Creators
 public class ZombieSpawner extends EnemySpawner {
-    public Enemy createEnemy() {
-        return new Zombie();
-    }
+    public Enemy createEnemy() { return new Zombie(); }
 }
 
-// RobotSpawner.java - Concrete Creator
 public class RobotSpawner extends EnemySpawner {
-    public Enemy createEnemy() {
-        return new Robot();
-    }
+    public Enemy createEnemy() { return new Robot(); }
 }
 
 // ---- Cách gọi và kiểm chứng ----
 public class Demo {
     public static void main(String[] args) {
-        EnemySpawner spawner;
-
-        spawner = new ZombieSpawner();
+        EnemySpawner spawner = new ZombieSpawner();
         spawner.spawnAndAttack();
         // Output: Kẻ địch xuất hiện!
         // Output: Zombie tấn công: Cắn!
@@ -189,77 +168,69 @@ Tưởng tượng bạn đang trang trí một căn phòng theo **phong cách Sc
 
 **Ví dụ 1**
 
-- **Bài toán**: Ứng dụng desktop cần hỗ trợ giao diện trên cả Windows và macOS. Button, Checkbox, TextField trên mỗi hệ điều hành có giao diện khác nhau nhưng phải nhất quán — không thể lấy Button Windows mix với Checkbox macOS.
-- **Cách Abstract Factory giải quyết**: Interface `UIFactory` khai báo các method `createButton()`, `createCheckbox()`. `WindowsUIFactory` tạo ra bộ UI Windows đồng bộ, `MacUIFactory` tạo bộ UI Mac đồng bộ. Ứng dụng chỉ làm việc qua interface.
+- **Bài toán**: Ứng dụng desktop cần hỗ trợ giao diện trên cả Windows và macOS. Button, Checkbox trên mỗi hệ điều hành có giao diện khác nhau nhưng phải nhất quán — không thể lấy Button Windows mix với Checkbox macOS.
+- **Cách Abstract Factory giải quyết**: Interface `UIFactory` khai báo `createButton()`, `createCheckbox()`. `WindowsUIFactory` tạo ra bộ UI Windows đồng bộ, `MacUIFactory` tạo bộ UI Mac đồng bộ.
 
 **Ví dụ 2**
 
-- **Bài toán**: Game có hai thế giới: Medieval (Trung Cổ) và Sci-Fi. Mỗi thế giới có nhân vật Hero, loại vũ khí Weapon, và loại kẻ địch Enemy đặc trưng riêng. Cần đảm bảo khi chơi Medieval thì tất cả đều thuần Trung Cổ.
-- **Cách Abstract Factory giải quyết**: `WorldFactory` là abstract factory với các method tạo Hero, Weapon, Enemy. `MedievalFactory` và `SciFiFactory` cài đặt cụ thể, đảm bảo mọi object trong một thế giới đều thuộc về thế giới đó.
+- **Bài toán**: Game có hai thế giới: Medieval và Sci-Fi. Mỗi thế giới có nhân vật Hero, Weapon, Enemy đặc trưng riêng. Cần đảm bảo khi chơi Medieval thì tất cả đều thuần Trung Cổ, không trộn lẫn Sci-Fi.
+- **Cách Abstract Factory giải quyết**: `WorldFactory` abstract với các method tạo Hero, Weapon, Enemy. `MedievalFactory` và `SciFiFactory` cài đặt cụ thể, đảm bảo mọi object trong một thế giới đều thuộc về thế giới đó.
 
 **Ví dụ 3**
 
-- **Bài toán**: Ứng dụng e-commerce cần hỗ trợ nhiều cổng thanh toán: Stripe và PayPal. Mỗi cổng có bộ gồm: `PaymentProcessor` (xử lý thanh toán) và `InvoiceGenerator` (tạo hóa đơn) theo chuẩn riêng. Trộn lẫn Stripe processor với PayPal invoice sẽ gây lỗi không tương thích.
-- **Cách Abstract Factory giải quyết**: `PaymentFactory` là interface khai báo `createProcessor()` và `createInvoiceGenerator()`. Mỗi cổng thanh toán có factory riêng đảm bảo sự đồng bộ.
+- **Bài toán**: Ứng dụng e-commerce cần hỗ trợ Stripe và PayPal. Mỗi cổng có bộ gồm: `PaymentProcessor` và `InvoiceGenerator` theo chuẩn riêng. Trộn lẫn Stripe processor với PayPal invoice sẽ gây lỗi không tương thích.
+- **Cách Abstract Factory giải quyết**: `PaymentFactory` khai báo `createProcessor()` và `createInvoiceGenerator()`. Mỗi cổng thanh toán có factory riêng đảm bảo sự đồng bộ.
 
 ```java
-// PaymentProcessor.java
 public interface PaymentProcessor {
     void processPayment(double amount);
 }
 
-// InvoiceGenerator.java
 public interface InvoiceGenerator {
     void generateInvoice(double amount);
 }
 
-// StripeProcessor.java
 public class StripeProcessor implements PaymentProcessor {
     public void processPayment(double amount) {
         System.out.println("Stripe: Xử lý thanh toán $" + amount);
     }
 }
 
-// StripeInvoice.java
 public class StripeInvoice implements InvoiceGenerator {
     public void generateInvoice(double amount) {
-        System.out.println("Stripe: Tạo hóa đơn chuẩn Stripe cho $" + amount);
+        System.out.println("Stripe: Tạo hóa đơn cho $" + amount);
     }
 }
 
-// PaypalProcessor.java
 public class PaypalProcessor implements PaymentProcessor {
     public void processPayment(double amount) {
         System.out.println("PayPal: Xử lý thanh toán $" + amount);
     }
 }
 
-// PaypalInvoice.java
 public class PaypalInvoice implements InvoiceGenerator {
     public void generateInvoice(double amount) {
-        System.out.println("PayPal: Tạo hóa đơn chuẩn PayPal cho $" + amount);
+        System.out.println("PayPal: Tạo hóa đơn cho $" + amount);
     }
 }
 
-// PaymentFactory.java - Abstract Factory
+// Abstract Factory
 public interface PaymentFactory {
     PaymentProcessor createProcessor();
     InvoiceGenerator createInvoiceGenerator();
 }
 
-// StripeFactory.java
 public class StripeFactory implements PaymentFactory {
     public PaymentProcessor createProcessor() { return new StripeProcessor(); }
     public InvoiceGenerator createInvoiceGenerator() { return new StripeInvoice(); }
 }
 
-// PaypalFactory.java
 public class PaypalFactory implements PaymentFactory {
     public PaymentProcessor createProcessor() { return new PaypalProcessor(); }
     public InvoiceGenerator createInvoiceGenerator() { return new PaypalInvoice(); }
 }
 
-// CheckoutService.java - Client
+// Client
 public class CheckoutService {
     private PaymentProcessor processor;
     private InvoiceGenerator invoiceGenerator;
@@ -278,15 +249,15 @@ public class CheckoutService {
 // ---- Cách gọi và kiểm chứng ----
 public class Demo {
     public static void main(String[] args) {
-        CheckoutService stripeCheckout = new CheckoutService(new StripeFactory());
-        stripeCheckout.checkout(99.99);
+        CheckoutService stripe = new CheckoutService(new StripeFactory());
+        stripe.checkout(99.99);
         // Output: Stripe: Xử lý thanh toán $99.99
-        // Output: Stripe: Tạo hóa đơn chuẩn Stripe cho $99.99
+        // Output: Stripe: Tạo hóa đơn cho $99.99
 
-        CheckoutService paypalCheckout = new CheckoutService(new PaypalFactory());
-        paypalCheckout.checkout(49.50);
+        CheckoutService paypal = new CheckoutService(new PaypalFactory());
+        paypal.checkout(49.50);
         // Output: PayPal: Xử lý thanh toán $49.5
-        // Output: PayPal: Tạo hóa đơn chuẩn PayPal cho $49.5
+        // Output: PayPal: Tạo hóa đơn cho $49.5
     }
 }
 ```
@@ -309,21 +280,20 @@ Hãy hình dung bạn đang **đặt một chiếc bánh burger tại quầy ord
 
 **Ví dụ 1**
 
-- **Bài toán**: Class `User` có 10 thuộc tính (tên, email, tuổi, địa chỉ, số điện thoại...) nhưng không phải field nào cũng bắt buộc. Nếu dùng constructor, bạn sẽ phải viết vô số constructor overload hoặc truyền `null` vào các field không dùng — rất khó đọc và dễ nhầm thứ tự tham số.
-- **Cách Builder giải quyết**: `UserBuilder` cho phép gọi `.name("Kiet").email("a@b.com").age(25).build()` — chỉ set những field cần thiết, thứ tự tùy ý, code đọc rất rõ ràng.
+- **Bài toán**: Class `User` có 10 thuộc tính nhưng không phải field nào cũng bắt buộc. Nếu dùng constructor, phải viết vô số constructor overload hoặc truyền `null` vào các field không dùng — rất khó đọc và dễ nhầm thứ tự tham số.
+- **Cách Builder giải quyết**: `UserBuilder` cho phép gọi `.name("Kiet").email("a@b.com").age(25).build()` — chỉ set những field cần thiết, thứ tự tùy ý.
 
 **Ví dụ 2**
 
 - **Bài toán**: Tạo các loại báo cáo (Report): có loại cần header + body, có loại cần header + body + footer + chart. Cùng bước xây dựng nhưng kết quả khác nhau. Nếu xây dựng trực tiếp trong từng class, logic bị lặp lại và khó bảo trì.
-- **Cách Builder giải quyết**: `ReportBuilder` abstract định nghĩa các bước `buildHeader()`, `buildBody()`, `buildFooter()`. Các concrete builder như `PDFReportBuilder`, `HTMLReportBuilder` cài đặt từng bước theo cách riêng. `Director` điều phối thứ tự các bước.
+- **Cách Builder giải quyết**: `ReportBuilder` abstract định nghĩa các bước `buildHeader()`, `buildBody()`, `buildFooter()`. Các concrete builder `PDFReportBuilder`, `HTMLReportBuilder` cài đặt từng bước theo cách riêng.
 
 **Ví dụ 3**
 
-- **Bài toán**: Ứng dụng gửi email cần tạo object `Email` với nhiều thuộc tính tùy chọn: to, cc, bcc, subject, body, attachments. Một số email chỉ cần to + subject + body, một số cần đầy đủ. Constructor với nhiều tham số tùy chọn rất khó dùng đúng.
+- **Bài toán**: Ứng dụng gửi email cần tạo object `Email` với nhiều thuộc tính tùy chọn: to, cc, bcc, subject, body. Một số email chỉ cần to + subject + body, một số cần đầy đủ. Constructor với nhiều tham số tùy chọn rất khó dùng đúng.
 - **Cách Builder giải quyết**: `EmailBuilder` cho phép linh hoạt set từng phần, chỉ validate khi `.build()` — đảm bảo object Email luôn hợp lệ khi được tạo ra.
 
 ```java
-// Email.java
 public class Email {
     private String to;
     private String subject;
@@ -334,11 +304,9 @@ public class Email {
     private Email() {}
 
     public String toString() {
-        return "Email{to='" + to + "', subject='" + subject +
-               "', body='" + body + "', cc='" + cc + "', bcc='" + bcc + "'}";
+        return "Email{to='" + to + "', subject='" + subject + "', cc='" + cc + "'}";
     }
 
-    // EmailBuilder là static inner class
     public static class EmailBuilder {
         private String to;
         private String subject;
@@ -346,35 +314,15 @@ public class Email {
         private String cc = "";
         private String bcc = "";
 
-        public EmailBuilder to(String to) {
-            this.to = to;
-            return this;
-        }
-
-        public EmailBuilder subject(String subject) {
-            this.subject = subject;
-            return this;
-        }
-
-        public EmailBuilder body(String body) {
-            this.body = body;
-            return this;
-        }
-
-        public EmailBuilder cc(String cc) {
-            this.cc = cc;
-            return this;
-        }
-
-        public EmailBuilder bcc(String bcc) {
-            this.bcc = bcc;
-            return this;
-        }
+        public EmailBuilder to(String to) { this.to = to; return this; }
+        public EmailBuilder subject(String s) { this.subject = s; return this; }
+        public EmailBuilder body(String b) { this.body = b; return this; }
+        public EmailBuilder cc(String cc) { this.cc = cc; return this; }
+        public EmailBuilder bcc(String bcc) { this.bcc = bcc; return this; }
 
         public Email build() {
-            if (to == null || subject == null) {
+            if (to == null || subject == null)
                 throw new IllegalStateException("Email phải có 'to' và 'subject'");
-            }
             Email email = new Email();
             email.to = this.to;
             email.subject = this.subject;
@@ -389,25 +337,23 @@ public class Email {
 // ---- Cách gọi và kiểm chứng ----
 public class Demo {
     public static void main(String[] args) {
-        // Email đơn giản
-        Email simpleEmail = new Email.EmailBuilder()
+        Email simple = new Email.EmailBuilder()
             .to("boss@company.com")
             .subject("Báo cáo tuần")
-            .body("Kính gửi sếp, đây là báo cáo tuần...")
+            .body("Kính gửi sếp...")
             .build();
-        System.out.println(simpleEmail);
-        // Output: Email{to='boss@company.com', subject='Báo cáo tuần', body='Kính gửi...', cc='', bcc=''}
+        System.out.println(simple);
+        // Output: Email{to='boss@company.com', subject='Báo cáo tuần', cc=''}
 
-        // Email đầy đủ
-        Email fullEmail = new Email.EmailBuilder()
+        Email full = new Email.EmailBuilder()
             .to("team@company.com")
             .subject("Họp khẩn")
-            .body("Mời toàn team tham dự!")
+            .body("Mời toàn team!")
             .cc("manager@company.com")
             .bcc("hr@company.com")
             .build();
-        System.out.println(fullEmail);
-        // Output: Email{to='team@company.com', subject='Họp khẩn', body='Mời toàn team...', cc='manager@company.com', bcc='hr@company.com'}
+        System.out.println(full);
+        // Output: Email{to='team@company.com', subject='Họp khẩn', cc='manager@company.com'}
     }
 }
 ```
@@ -435,20 +381,19 @@ Tưởng tượng bạn có một **bản vẽ thiết kế ngôi nhà** rất c
 
 **Ví dụ 2**
 
-- **Bài toán**: Ứng dụng vẽ đồ họa cho phép user duplicate các shape (hình tròn, hình chữ nhật). Không thể biết trước user sẽ duplicate loại shape nào. Nếu dùng `instanceof` để kiểm tra rồi `new`, code rất rắc rối và vi phạm Open/Closed.
+- **Bài toán**: Ứng dụng vẽ đồ họa cho phép user duplicate các shape. Không thể biết trước user sẽ duplicate loại shape nào. Nếu dùng `instanceof` để kiểm tra rồi `new`, code rất rắc rối và vi phạm Open/Closed.
 - **Cách Prototype giải quyết**: Mỗi shape implement `clone()` — khi duplicate, chỉ cần gọi `selectedShape.clone()`, không cần biết đó là hình gì.
 
 **Ví dụ 3**
 
-- **Bài toán**: Hệ thống tạo hợp đồng (contract). Mỗi tháng công ty tạo hàng chục hợp đồng dịch vụ có cùng điều khoản chuẩn, chỉ khác tên khách hàng và ngày ký. Khởi tạo lại toàn bộ hợp đồng từ đầu mỗi lần là dư thừa.
+- **Bài toán**: Hệ thống tạo hợp đồng. Mỗi tháng công ty tạo hàng chục hợp đồng có cùng điều khoản chuẩn, chỉ khác tên khách hàng và ngày ký. Khởi tạo lại toàn bộ hợp đồng từ đầu mỗi lần là dư thừa.
 - **Cách Prototype giải quyết**: Lưu một `templateContract` như prototype. Mỗi hợp đồng mới clone từ template rồi chỉ cập nhật tên khách và ngày ký.
 
 ```java
-// Contract.java
 public class Contract implements Cloneable {
     private String customerName;
     private String signDate;
-    private String terms; // điều khoản chuẩn (dài và phức tạp)
+    private String terms;
 
     public Contract(String customerName, String signDate, String terms) {
         this.customerName = customerName;
@@ -468,39 +413,31 @@ public class Contract implements Cloneable {
     }
 
     public String toString() {
-        return "Contract{customer='" + customerName + "', date='" + signDate +
-               "', terms='" + terms.substring(0, 20) + "...'}";
+        return "Contract{customer='" + customerName + "', date='" + signDate + "'}";
     }
 }
 
 // ---- Cách gọi và kiểm chứng ----
 public class Demo {
     public static void main(String[] args) {
-        // Template contract với điều khoản chuẩn
-        Contract template = new Contract(
-            "TEMPLATE",
-            "N/A",
-            "Điều khoản 1: ... Điều khoản 2: ... Điều khoản 3: ..."
-        );
+        Contract template = new Contract("TEMPLATE", "N/A", "Điều khoản 1... Điều khoản 2...");
 
-        // Tạo hợp đồng cho khách hàng A bằng cách clone
         Contract contractA = template.clone();
         contractA.setCustomerName("Nguyễn Văn A");
         contractA.setSignDate("2026-09-16");
 
-        // Tạo hợp đồng cho khách hàng B bằng cách clone
         Contract contractB = template.clone();
         contractB.setCustomerName("Trần Thị B");
         contractB.setSignDate("2026-09-17");
 
         System.out.println(contractA);
-        // Output: Contract{customer='Nguyễn Văn A', date='2026-09-16', terms='Điều khoản 1: ... Đi...'}
+        // Output: Contract{customer='Nguyễn Văn A', date='2026-09-16'}
 
         System.out.println(contractB);
-        // Output: Contract{customer='Trần Thị B', date='2026-09-17', terms='Điều khoản 1: ... Đi...'}
+        // Output: Contract{customer='Trần Thị B', date='2026-09-17'}
 
-        System.out.println("contractA và contractB là 2 object khác nhau: " + (contractA != contractB));
-        // Output: contractA và contractB là 2 object khác nhau: true
+        System.out.println("Hai object khác nhau? " + (contractA != contractB));
+        // Output: Hai object khác nhau? true
     }
 }
 ```
@@ -509,7 +446,7 @@ public class Demo {
 
 ### Ý nghĩa của Prototype
 
-Prototype giải quyết bài toán cần tạo nhiều object tương tự nhau mà việc khởi tạo từ đầu tốn kém (tài nguyên hoặc code phức tạp). Nên dùng khi cần duplicate object mà không phụ thuộc vào class cụ thể của nó. Trong nhóm Creational, Prototype là pattern duy nhất tạo object bằng cách sao chép thay vì xây dựng — điểm đặc trưng để phân biệt với các pattern còn lại.
+Prototype giải quyết bài toán cần tạo nhiều object tương tự nhau mà việc khởi tạo từ đầu tốn kém. Nên dùng khi cần duplicate object mà không phụ thuộc vào class cụ thể của nó. Trong nhóm Creational, Prototype là pattern duy nhất tạo object bằng cách sao chép thay vì xây dựng — điểm đặc trưng để phân biệt với các pattern còn lại.
 
 ---
 
@@ -527,7 +464,7 @@ Tưởng tượng bạn mua một **thiết bị điện từ Mỹ** về Việt
 
 **Ví dụ 1**
 
-- **Bài toán**: Code có sẵn dùng interface `OldLogger` với method `log(String msg)`. Bạn muốn tích hợp thư viện logging mới `NewLogger` với method `writeLog(String level, String msg)`. Không thể sửa thư viện mới, không muốn sửa hết code cũ.
+- **Bài toán**: Code có sẵn dùng interface `OldLogger` với method `log(String msg)`. Muốn tích hợp thư viện logging mới `NewLogger` với method `writeLog(String level, String msg)`. Không thể sửa thư viện mới, không muốn sửa hết code cũ.
 - **Cách Adapter giải quyết**: Tạo `LoggerAdapter` implement `OldLogger`, bên trong giữ reference đến `NewLogger` và chuyển đổi lời gọi `log()` sang `writeLog()`.
 
 **Ví dụ 2**
@@ -541,31 +478,27 @@ Tưởng tượng bạn mua một **thiết bị điện từ Mỹ** về Việt
 - **Cách Adapter giải quyết**: Tạo `JsonExporterAdapter` implement `DataExporter`, chuyển đổi `List<String>` sang `String[]` và gọi thư viện JSON.
 
 ```java
-// DataExporter.java - Interface client đang dùng
+import java.util.List;
+
 public interface DataExporter {
-    void exportToCsv(java.util.List<String> data);
+    void exportToCsv(List<String> data);
 }
 
-// CsvExporter.java - Implementation gốc
+// Implementation gốc
 public class CsvExporter implements DataExporter {
-    public void exportToCsv(java.util.List<String> data) {
+    public void exportToCsv(List<String> data) {
         System.out.println("CSV Export: " + String.join(",", data));
     }
 }
 
-// JsonLibrary.java - Thư viện bên thứ ba, không thể sửa
+// Thư viện bên thứ ba, không thể sửa
 public class JsonLibrary {
     public void toJson(String[] items) {
-        System.out.print("JSON Export: [");
-        for (int i = 0; i < items.length; i++) {
-            System.out.print("\"" + items[i] + "\"");
-            if (i < items.length - 1) System.out.print(", ");
-        }
-        System.out.println("]");
+        System.out.println("JSON Export: [\"" + String.join("\", \"", items) + "\"]");
     }
 }
 
-// JsonExporterAdapter.java - Adapter
+// Adapter
 public class JsonExporterAdapter implements DataExporter {
     private JsonLibrary jsonLibrary;
 
@@ -573,9 +506,8 @@ public class JsonExporterAdapter implements DataExporter {
         this.jsonLibrary = jsonLibrary;
     }
 
-    public void exportToCsv(java.util.List<String> data) {
-        // Chuyển đổi List<String> -> String[] cho JsonLibrary
-        String[] items = data.toArray(new String[0]);
+    public void exportToCsv(List<String> data) {
+        String[] items = data.toArray(new String[0]); // chuyển đổi ở đây
         jsonLibrary.toJson(items);
     }
 }
@@ -583,14 +515,12 @@ public class JsonExporterAdapter implements DataExporter {
 // ---- Cách gọi và kiểm chứng ----
 public class Demo {
     public static void main(String[] args) {
-        java.util.List<String> data = java.util.Arrays.asList("Alice", "Bob", "Charlie");
+        List<String> data = java.util.Arrays.asList("Alice", "Bob", "Charlie");
 
-        // Dùng CSV exporter gốc
         DataExporter csvExporter = new CsvExporter();
         csvExporter.exportToCsv(data);
         // Output: CSV Export: Alice,Bob,Charlie
 
-        // Dùng JSON library qua adapter — cùng interface!
         DataExporter jsonExporter = new JsonExporterAdapter(new JsonLibrary());
         jsonExporter.exportToCsv(data);
         // Output: JSON Export: ["Alice", "Bob", "Charlie"]
@@ -598,7 +528,7 @@ public class Demo {
 }
 ```
 
-**Điểm mấu chốt cần nhớ**: Client (`Demo`) gọi `exportToCsv()` trên cả hai exporter mà không biết loại nào là adapter. `JsonExporterAdapter` "dịch" lời gọi từ interface cũ sang API của thư viện mới — đây là bản chất của Adapter.
+**Điểm mấu chốt cần nhớ**: Client gọi `exportToCsv()` trên cả hai exporter mà không biết loại nào là adapter. `JsonExporterAdapter` "dịch" lời gọi từ interface cũ sang API của thư viện mới — đây là bản chất của Adapter.
 
 ### Ý nghĩa của Adapter
 
@@ -617,58 +547,47 @@ Hãy hình dung bạn gọi điện đến **tổng đài chăm sóc khách hàn
 **Ví dụ 1**
 
 - **Bài toán**: Để khởi động một bộ máy tính, cần gọi đúng thứ tự: `CPU.initialize()`, `Memory.load()`, `HardDrive.read()`, `BIOS.check()`... Mỗi lần khởi động, client phải tự nhớ và gọi đúng trình tự — rất dễ sai và khó bảo trì.
-- **Cách Facade giải quyết**: Class `ComputerFacade` với method `startComputer()` gói gọn toàn bộ trình tự khởi động. Client chỉ cần gọi một method duy nhất.
+- **Cách Facade giải quyết**: Class `ComputerFacade` với method `startComputer()` gói gọn toàn bộ trình tự. Client chỉ cần gọi một method duy nhất.
 
 **Ví dụ 2**
 
-- **Bài toán**: Hệ thống xử lý đơn hàng cần phối hợp `InventoryService`, `PaymentService`, `ShippingService`, `NotificationService`. Client phải tự orchestrate 4 service này — code client phình to, khó test, khi logic thay đổi phải sửa nhiều nơi.
+- **Bài toán**: Hệ thống xử lý đơn hàng cần phối hợp `InventoryService`, `PaymentService`, `ShippingService`, `NotificationService`. Client phải tự orchestrate 4 service này — code client phình to, khó test.
 - **Cách Facade giải quyết**: `OrderFacade` với method `placeOrder()` điều phối toàn bộ 4 service bên trong. Client chỉ cần gọi `orderFacade.placeOrder(order)`.
 
 **Ví dụ 3**
 
-- **Bài toán**: Hệ thống xem phim tại nhà gồm: `Projector`, `AudioSystem`, `StreamingService`, `Lights`. Để xem phim phải bật đúng thứ tự: tắt đèn, bật projector, bật âm thanh, mở streaming. Muốn dừng lại cũng phải tắt theo thứ tự ngược lại. Rất rắc rối nếu phải làm thủ công mỗi lần.
+- **Bài toán**: Hệ thống xem phim tại nhà gồm: `Projector`, `AudioSystem`, `StreamingService`, `Lights`. Để xem phim phải bật đúng thứ tự: tắt đèn, bật projector, bật âm thanh, mở streaming. Rất rắc rối nếu phải làm thủ công mỗi lần.
 - **Cách Facade giải quyết**: `HomeTheaterFacade` với method `watchMovie()` và `stopMovie()` đóng gói toàn bộ quy trình.
 
 ```java
-// Projector.java
 public class Projector {
     public void on() { System.out.println("Projector: Bật lên"); }
     public void off() { System.out.println("Projector: Tắt đi"); }
 }
 
-// AudioSystem.java
 public class AudioSystem {
     public void on() { System.out.println("AudioSystem: Bật âm thanh"); }
     public void setVolume(int level) { System.out.println("AudioSystem: Volume = " + level); }
     public void off() { System.out.println("AudioSystem: Tắt âm thanh"); }
 }
 
-// StreamingService.java
 public class StreamingService {
     public void connect() { System.out.println("Streaming: Kết nối internet"); }
     public void play(String movie) { System.out.println("Streaming: Phát '" + movie + "'"); }
     public void disconnect() { System.out.println("Streaming: Ngắt kết nối"); }
 }
 
-// Lights.java
 public class Lights {
-    public void dim() { System.out.println("Lights: Giảm đèn 20%"); }
-    public void on() { System.out.println("Lights: Bật đèn đầy"); }
+    public void dim() { System.out.println("Lights: Giảm đèn"); }
+    public void on() { System.out.println("Lights: Bật đèn"); }
 }
 
-// HomeTheaterFacade.java - Facade
+// Facade
 public class HomeTheaterFacade {
-    private Projector projector;
-    private AudioSystem audio;
-    private StreamingService streaming;
-    private Lights lights;
-
-    public HomeTheaterFacade() {
-        this.projector = new Projector();
-        this.audio = new AudioSystem();
-        this.streaming = new StreamingService();
-        this.lights = new Lights();
-    }
+    private Projector projector = new Projector();
+    private AudioSystem audio = new AudioSystem();
+    private StreamingService streaming = new StreamingService();
+    private Lights lights = new Lights();
 
     public void watchMovie(String movie) {
         System.out.println("--- Chuẩn bị xem phim ---");
@@ -696,7 +615,7 @@ public class Demo {
 
         theater.watchMovie("Inception");
         // Output: --- Chuẩn bị xem phim ---
-        // Output: Lights: Giảm đèn 20%
+        // Output: Lights: Giảm đèn
         // Output: Projector: Bật lên
         // Output: AudioSystem: Bật âm thanh
         // Output: AudioSystem: Volume = 8
@@ -708,16 +627,16 @@ public class Demo {
         // Output: Streaming: Ngắt kết nối
         // Output: AudioSystem: Tắt âm thanh
         // Output: Projector: Tắt đi
-        // Output: Lights: Bật đèn đầy
+        // Output: Lights: Bật đèn
     }
 }
 ```
 
-**Điểm mấu chốt cần nhớ**: Client (`Demo`) chỉ tương tác với `HomeTheaterFacade` — không biết gì về `Projector`, `AudioSystem`, hay `StreamingService`. Toàn bộ sự phức tạp bị ẩn đi sau một interface đơn giản gồm 2 method.
+**Điểm mấu chốt cần nhớ**: Client chỉ tương tác với `HomeTheaterFacade` — không biết gì về `Projector`, `AudioSystem`, hay `StreamingService`. Toàn bộ sự phức tạp bị ẩn đi sau một interface đơn giản gồm 2 method.
 
 ### Ý nghĩa của Facade
 
-Facade giải quyết vấn đề hệ thống con quá phức tạp, client phải biết quá nhiều thứ để dùng được. Nên dùng khi muốn cung cấp một "lối vào đơn giản" vào một subsystem phức tạp, hoặc khi muốn giảm sự phụ thuộc của client vào các chi tiết bên trong. Khác với Adapter (chuyển đổi interface), Facade **thiết kế** một interface mới hoàn toàn đơn giản hơn — không cần phải khớp với interface có sẵn của bất kỳ thứ gì.
+Facade giải quyết vấn đề hệ thống con quá phức tạp, client phải biết quá nhiều thứ để dùng được. Nên dùng khi muốn cung cấp một "lối vào đơn giản" vào một subsystem phức tạp, hoặc khi muốn giảm sự phụ thuộc của client vào các chi tiết bên trong. Khác với Adapter (chuyển đổi interface), Facade **thiết kế** một interface mới hoàn toàn đơn giản hơn.
 
 ---
 
@@ -731,71 +650,51 @@ Tưởng tượng bạn đang **order cà phê tại Starbucks**: bắt đầu t
 
 **Ví dụ 1**
 
-- **Bài toán**: `TextEditor` có method `write()`. Muốn thêm tính năng: bold, italic, underline — và có thể kết hợp tùy ý (bold + italic, hoặc bold + italic + underline). Nếu dùng kế thừa, cần 7 subclass cho mọi tổ hợp — bùng nổ class.
+- **Bài toán**: `TextEditor` có method `write()`. Muốn thêm tính năng: bold, italic, underline — và có thể kết hợp tùy ý. Nếu dùng kế thừa, cần 7 subclass cho mọi tổ hợp — bùng nổ class.
 - **Cách Decorator giải quyết**: `BoldDecorator`, `ItalicDecorator` wrap object `TextEditor` gốc, thêm behavior vào `write()`. Muốn bold + italic: `new ItalicDecorator(new BoldDecorator(editor))`.
 
 **Ví dụ 2**
 
-- **Bài toán**: Stream đọc file: cần compress, encrypt, buffer theo thứ tự tùy chọn. Tạo subclass cho từng tổ hợp là không thực tế. `CompressedEncryptedBufferedStream` — cách đặt tên đã nói lên vấn đề.
+- **Bài toán**: Stream đọc file: cần compress, encrypt, buffer theo thứ tự tùy chọn. Tạo subclass cho từng tổ hợp là không thực tế.
 - **Cách Decorator giải quyết**: Java I/O dùng đúng pattern này: `new BufferedInputStream(new GZIPInputStream(new FileInputStream("file")))` — mỗi lớp wrapper thêm một tính năng.
 
 **Ví dụ 3**
 
-- **Bài toán**: Ứng dụng có `NotificationService` gửi email cơ bản. Muốn thêm tính năng: ghi log trước khi gửi, đo thời gian gửi, retry nếu thất bại — và có thể bật/tắt từng tính năng độc lập theo môi trường (dev/production).
+- **Bài toán**: Ứng dụng có `NotificationService` gửi email cơ bản. Muốn thêm: ghi log trước khi gửi, đo thời gian gửi, retry nếu thất bại — và có thể bật/tắt từng tính năng độc lập theo môi trường (dev/production).
 - **Cách Decorator giải quyết**: Mỗi tính năng phụ trợ là một Decorator riêng, wrap `NotificationService` gốc. Ghép tổ hợp tùy ý không cần tạo thêm subclass.
 
 ```java
-// Coffee.java - Component interface
 public interface Coffee {
     String getDescription();
     double getCost();
 }
 
-// SimpleCoffee.java - Concrete Component
 public class SimpleCoffee implements Coffee {
     public String getDescription() { return "Cà phê đen"; }
     public double getCost() { return 20000; }
 }
 
-// CoffeeDecorator.java - Base Decorator
+// Base Decorator
 public abstract class CoffeeDecorator implements Coffee {
     protected Coffee coffee;
-
-    public CoffeeDecorator(Coffee coffee) {
-        this.coffee = coffee;
-    }
+    public CoffeeDecorator(Coffee coffee) { this.coffee = coffee; }
 }
 
-// MilkDecorator.java
 public class MilkDecorator extends CoffeeDecorator {
     public MilkDecorator(Coffee coffee) { super(coffee); }
-
-    public String getDescription() {
-        return coffee.getDescription() + " + Sữa";
-    }
-
+    public String getDescription() { return coffee.getDescription() + " + Sữa"; }
     public double getCost() { return coffee.getCost() + 5000; }
 }
 
-// SugarDecorator.java
 public class SugarDecorator extends CoffeeDecorator {
     public SugarDecorator(Coffee coffee) { super(coffee); }
-
-    public String getDescription() {
-        return coffee.getDescription() + " + Đường";
-    }
-
+    public String getDescription() { return coffee.getDescription() + " + Đường"; }
     public double getCost() { return coffee.getCost() + 2000; }
 }
 
-// WhipDecorator.java
 public class WhipDecorator extends CoffeeDecorator {
     public WhipDecorator(Coffee coffee) { super(coffee); }
-
-    public String getDescription() {
-        return coffee.getDescription() + " + Kem tươi";
-    }
-
+    public String getDescription() { return coffee.getDescription() + " + Kem tươi"; }
     public double getCost() { return coffee.getCost() + 10000; }
 }
 
@@ -821,7 +720,7 @@ public class Demo {
 }
 ```
 
-**Điểm mấu chốt cần nhớ**: Mỗi Decorator **implement cùng interface** `Coffee` và **giữ một reference** đến `Coffee` khác bên trong. Đây là cách "bọc nhiều lớp" — mỗi lần gọi `getCost()`, nó gọi `coffee.getCost()` của lớp bên trong rồi cộng thêm phần của mình. Chuỗi gọi truyền xuống đến `SimpleCoffee` rồi cộng ngược lên.
+**Điểm mấu chốt cần nhớ**: Mỗi Decorator **implement cùng interface** `Coffee` và **giữ một reference** đến `Coffee` khác bên trong. Mỗi lần gọi `getCost()`, nó gọi `coffee.getCost()` của lớp bên trong rồi cộng thêm phần của mình — chuỗi gọi truyền xuống đến `SimpleCoffee` rồi cộng ngược lên.
 
 ### Ý nghĩa của Decorator
 
@@ -835,7 +734,7 @@ Decorator giải quyết bài toán cần thêm tính năng linh hoạt vào obj
 
 ## STRATEGY LÀ GÌ?
 
-Tưởng tượng bạn đang đi từ nhà đến sân bay. Bạn có thể **chọn cách di chuyển**: đi taxi (nhanh nhưng tốn tiền), đi xe buýt (rẻ nhưng chậm), đi xe máy (tiện nhưng phải gửi xe). Cùng một mục tiêu "đến sân bay", nhưng bạn linh hoạt **thay đổi chiến lược** tùy tình huống (trễ giờ → taxi, tiết kiệm → buýt).
+Tưởng tượng bạn đang đi từ nhà đến sân bay. Bạn có thể **chọn cách di chuyển**: đi taxi (nhanh nhưng tốn tiền), đi xe buýt (rẻ nhưng chậm), đi xe máy (tiện nhưng phải gửi xe). Cùng một mục tiêu "đến sân bay", nhưng bạn linh hoạt **thay đổi chiến lược** tùy tình huống.
 
 Đây chính là ý tưởng cốt lõi của Strategy: **định nghĩa một tập hợp các thuật toán, đóng gói từng cái, và làm cho chúng có thể hoán đổi cho nhau — cho phép thay đổi thuật toán độc lập với client sử dụng nó.**
 
@@ -853,37 +752,33 @@ Tưởng tượng bạn đang đi từ nhà đến sân bay. Bạn có thể **c
 
 **Ví dụ 3**
 
-- **Bài toán**: Ứng dụng nén file hỗ trợ ZIP, GZIP, RAR. Logic nén của từng định dạng rất khác nhau, nhưng interface với user là như nhau: chọn file → chọn định dạng → nén. Cần thiết kế sao cho dễ thêm định dạng mới mà không sửa code hiện có.
+- **Bài toán**: Ứng dụng nén file hỗ trợ ZIP, GZIP, RAR. Logic nén của từng định dạng rất khác nhau, nhưng interface với user là như nhau. Cần thiết kế sao cho dễ thêm định dạng mới mà không sửa code hiện có.
 - **Cách Strategy giải quyết**: Mỗi định dạng nén implement interface `CompressionStrategy`. `FileCompressor` nhận strategy và delegate việc nén cho strategy đó.
 
 ```java
-// CompressionStrategy.java
 public interface CompressionStrategy {
     void compress(String fileName);
 }
 
-// ZipStrategy.java
 public class ZipStrategy implements CompressionStrategy {
     public void compress(String fileName) {
-        System.out.println("Nén '" + fileName + "' bằng ZIP (tốc độ cao, tỉ lệ nén vừa)");
+        System.out.println("Nén '" + fileName + "' bằng ZIP");
     }
 }
 
-// GzipStrategy.java
 public class GzipStrategy implements CompressionStrategy {
     public void compress(String fileName) {
-        System.out.println("Nén '" + fileName + "' bằng GZIP (tỉ lệ nén cao hơn ZIP)");
+        System.out.println("Nén '" + fileName + "' bằng GZIP");
     }
 }
 
-// RarStrategy.java
 public class RarStrategy implements CompressionStrategy {
     public void compress(String fileName) {
-        System.out.println("Nén '" + fileName + "' bằng RAR (nén mạnh, hỗ trợ password)");
+        System.out.println("Nén '" + fileName + "' bằng RAR");
     }
 }
 
-// FileCompressor.java - Context
+// Context
 public class FileCompressor {
     private CompressionStrategy strategy;
 
@@ -905,16 +800,15 @@ public class Demo {
     public static void main(String[] args) {
         FileCompressor compressor = new FileCompressor(new ZipStrategy());
         compressor.compressFile("report.pdf");
-        // Output: Nén 'report.pdf' bằng ZIP (tốc độ cao, tỉ lệ nén vừa)
+        // Output: Nén 'report.pdf' bằng ZIP
 
-        // Đổi strategy tại runtime — không tạo object mới!
         compressor.setStrategy(new GzipStrategy());
         compressor.compressFile("backup.sql");
-        // Output: Nén 'backup.sql' bằng GZIP (tỉ lệ nén cao hơn ZIP)
+        // Output: Nén 'backup.sql' bằng GZIP
 
         compressor.setStrategy(new RarStrategy());
         compressor.compressFile("secret.docx");
-        // Output: Nén 'secret.docx' bằng RAR (nén mạnh, hỗ trợ password)
+        // Output: Nén 'secret.docx' bằng RAR
     }
 }
 ```
@@ -938,7 +832,7 @@ Tưởng tượng bạn **đăng ký nhận thông báo từ một kênh YouTube
 **Ví dụ 1**
 
 - **Bài toán**: Hệ thống giám sát server: khi CPU vượt 90%, cần gửi email alert, ghi log, và gửi SMS. Nếu code trực tiếp trong class `CpuMonitor`, mỗi lần thêm kênh thông báo mới phải sửa vào class đó — vi phạm Single Responsibility và Open/Closed.
-- **Cách Observer giải quyết**: `CpuMonitor` là Subject. `EmailAlerter`, `Logger`, `SmsAlerter` là Observer. Khi CPU vượt ngưỡng, `CpuMonitor` notify tất cả observers. Thêm kênh mới chỉ cần tạo Observer mới và đăng ký.
+- **Cách Observer giải quyết**: `CpuMonitor` là Subject. `EmailAlerter`, `Logger`, `SmsAlerter` là Observer. Thêm kênh mới chỉ cần tạo Observer mới và đăng ký.
 
 **Ví dụ 2**
 
@@ -947,27 +841,18 @@ Tưởng tượng bạn **đăng ký nhận thông báo từ một kênh YouTube
 
 **Ví dụ 3**
 
-- **Bài toán**: Hệ thống bán hàng: khi `Product` hết hàng, cần thông báo cho `WishlistService` (báo user đang theo dõi), `InventoryService` (đặt hàng lại), và `AnalyticsService` (ghi nhận). Ba service này độc lập nhau và có thể thêm/bớt tùy business requirement.
+- **Bài toán**: Hệ thống bán hàng: khi `Product` hết hàng, cần thông báo cho `WishlistService`, `InventoryService`, và `AnalyticsService`. Ba service này độc lập nhau và có thể thêm/bớt tùy business requirement.
 - **Cách Observer giải quyết**: `Product` là Subject. Ba service là Observer. `Product` chỉ cần gọi `notifyObservers()` — không cần biết đang notify ai.
 
 ```java
 import java.util.ArrayList;
 import java.util.List;
 
-// Observer.java
 public interface Observer {
     void update(String productName, int stock);
 }
 
-// Subject.java
-public interface Subject {
-    void addObserver(Observer observer);
-    void removeObserver(Observer observer);
-    void notifyObservers();
-}
-
-// Product.java - Concrete Subject
-public class Product implements Subject {
+public class Product {
     private List<Observer> observers = new ArrayList<>();
     private String name;
     private int stock;
@@ -980,7 +865,7 @@ public class Product implements Subject {
     public void addObserver(Observer observer) { observers.add(observer); }
     public void removeObserver(Observer observer) { observers.remove(observer); }
 
-    public void notifyObservers() {
+    private void notifyObservers() {
         for (Observer observer : observers) {
             observer.update(name, stock);
         }
@@ -988,31 +873,26 @@ public class Product implements Subject {
 
     public void setStock(int stock) {
         this.stock = stock;
-        System.out.println("[Product] '" + name + "' cập nhật tồn kho: " + stock);
-        if (stock == 0) {
-            notifyObservers();
-        }
+        System.out.println("[Product] '" + name + "' tồn kho: " + stock);
+        if (stock == 0) notifyObservers();
     }
 }
 
-// WishlistService.java - Concrete Observer
 public class WishlistService implements Observer {
     public void update(String productName, int stock) {
-        System.out.println("[WishlistService] Gửi email cho user đang theo dõi '" + productName + "': Hết hàng!");
+        System.out.println("[WishlistService] Báo user theo dõi '" + productName + "': Hết hàng!");
     }
 }
 
-// InventoryService.java - Concrete Observer
 public class InventoryService implements Observer {
     public void update(String productName, int stock) {
-        System.out.println("[InventoryService] Tự động đặt hàng lại '" + productName + "' từ nhà cung cấp.");
+        System.out.println("[InventoryService] Đặt hàng lại '" + productName + "' từ nhà cung cấp.");
     }
 }
 
-// AnalyticsService.java - Concrete Observer
 public class AnalyticsService implements Observer {
     public void update(String productName, int stock) {
-        System.out.println("[AnalyticsService] Ghi nhận sự kiện hết hàng: '" + productName + "'");
+        System.out.println("[AnalyticsService] Ghi nhận hết hàng: '" + productName + "'");
     }
 }
 
@@ -1020,20 +900,19 @@ public class AnalyticsService implements Observer {
 public class Demo {
     public static void main(String[] args) {
         Product iphone = new Product("iPhone 15", 5);
-
         iphone.addObserver(new WishlistService());
         iphone.addObserver(new InventoryService());
         iphone.addObserver(new AnalyticsService());
 
         iphone.setStock(2);
-        // Output: [Product] 'iPhone 15' cập nhật tồn kho: 2
-        // (Chưa notify vì stock != 0)
+        // Output: [Product] 'iPhone 15' tồn kho: 2
+        // (chưa notify vì stock != 0)
 
         iphone.setStock(0);
-        // Output: [Product] 'iPhone 15' cập nhật tồn kho: 0
-        // Output: [WishlistService] Gửi email cho user đang theo dõi 'iPhone 15': Hết hàng!
-        // Output: [InventoryService] Tự động đặt hàng lại 'iPhone 15' từ nhà cung cấp.
-        // Output: [AnalyticsService] Ghi nhận sự kiện hết hàng: 'iPhone 15'
+        // Output: [Product] 'iPhone 15' tồn kho: 0
+        // Output: [WishlistService] Báo user theo dõi 'iPhone 15': Hết hàng!
+        // Output: [InventoryService] Đặt hàng lại 'iPhone 15' từ nhà cung cấp.
+        // Output: [AnalyticsService] Ghi nhận hết hàng: 'iPhone 15'
     }
 }
 ```
