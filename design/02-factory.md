@@ -1,3 +1,5 @@
+S
+
 # Factory Pattern
 
 ## Mục đích

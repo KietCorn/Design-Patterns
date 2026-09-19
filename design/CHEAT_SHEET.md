@@ -166,58 +166,57 @@ Console.WriteLine(adapter.NewMethod("test")); // Old: test
 
 ---
 
-## 8️⃣ COMMAND - Encapsulate Action
+## 8️⃣ PROXY - Kiểm Soát Truy Cập
 
 ```csharp
-interface ICommand {
-    void Execute();
+interface IService { string Process(string data); }
+
+class RealService : IService {
+    public string Process(string data) => $"Done: {data}";
 }
 
-class Receiver {
-    public void Do() => Console.WriteLine("Doing");
-}
-
-class Command : ICommand {
-    private Receiver receiver;
-    public Command(Receiver r) => receiver = r;
-    public void Execute() => receiver.Do();
-}
-
-var cmd = new Command(new Receiver());
-cmd.Execute();
-```
-
-**Nhớ:** Interface ICommand, Execute gọi receiver.Do()
-
----
-
-## 9️⃣ STATE - Behavior Theo State
-
-```csharp
-interface IState {
-    void Execute(Context ctx);
-}
-
-class StateA : IState {
-    public void Execute(Context ctx) {
-        Console.WriteLine("A");
-        ctx.SetState(new StateB());
+class Proxy : IService {
+    private RealService real = new();
+    public string Process(string data) {
+        Console.WriteLine($"[LOG] {data}");
+        return real.Process(data);
     }
 }
 
-class Context {
-    private IState state;
-    public Context() => state = new StateA();
-    public void SetState(IState s) => state = s;
-    public void Execute() => state.Execute(this);
-}
-
-var ctx = new Context();
-ctx.Execute(); // A
-ctx.Execute(); // B
+IService svc = new Proxy();
+svc.Process("test"); // [LOG] test → Done: test
 ```
 
-**Nhớ:** IState interface, Execute nhận context, SetState trong Execute
+**Nhớ:** Cùng interface, wrap real object, thêm logic trước/sau
+
+---
+
+## 9️⃣ ABSTRACT FACTORY - Tạo Họ Object
+
+```csharp
+interface IButton { string Render(); }
+interface ICheckbox { string Render(); }
+
+class WinButton : IButton { public string Render() => "Win Btn"; }
+class WinCheckbox : ICheckbox { public string Render() => "Win Chk"; }
+class MacButton : IButton { public string Render() => "Mac Btn"; }
+class MacCheckbox : ICheckbox { public string Render() => "Mac Chk"; }
+
+interface IUIFactory {
+    IButton CreateButton();
+    ICheckbox CreateCheckbox();
+}
+
+class WinFactory : IUIFactory {
+    public IButton CreateButton() => new WinButton();
+    public ICheckbox CreateCheckbox() => new WinCheckbox();
+}
+
+IUIFactory factory = new WinFactory();
+var btn = factory.CreateButton();
+```
+
+**Nhớ:** Factory interface tạo nhiều product, mỗi concrete factory = 1 family
 
 ---
 
@@ -256,8 +255,8 @@ facade.DoEverything();
 | Observer | Notify observers | `List<IObserver>`, `ForEach` |
 | Decorator | Wrap object | `interface`, wrap constructor |
 | Adapter | Chuyển interface | `class Adapter : INew`, wrap old |
-| Command | Encapsulate | `interface ICommand`, Execute |
-| State | State machine | `interface IState`, SetState |
+| Proxy | Kiểm soát truy cập | Cùng interface, wrap real object |
+| Abstract Factory | Tạo họ object | Factory interface, nhiều Create methods |
 | Facade | Simplify API | Giữ subsystems, wrap logic |
 
 ---

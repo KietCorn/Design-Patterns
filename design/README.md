@@ -11,6 +11,7 @@ Tập hợp 10 design patterns cơ bản và thường dùng nhất trong phát 
 | 1 | [Singleton](01-singleton.md) | Một class chỉ có 1 instance | Database connection, Logger, Config manager |
 | 2 | [Factory](02-factory.md) | Tạo object mà không chỉ định class cụ thể | Multiple object types, Runtime decisions |
 | 3 | [Builder](03-builder.md) | Tạo object phức tạp từng bước | Object có nhiều thuộc tính optional |
+| 9 | [Abstract Factory](09-abstract-factory.md) | Tạo họ object liên quan | Cross-platform UI, DB abstraction |
 
 ### Behavioral Patterns (Hành Vi)
 
@@ -18,8 +19,6 @@ Tập hợp 10 design patterns cơ bản và thường dùng nhất trong phát 
 |---|---------|---------|---------|
 | 4 | [Strategy](04-strategy.md) | Chọn algorithm tại runtime | Multiple algorithms, Avoid if-else chains |
 | 5 | [Observer](05-observer.md) | Notify observers khi state thay đổi | Event handling, Real-time updates |
-| 8 | [Command](08-command.md) | Encapsulate request thành object | Undo/Redo, Job scheduling |
-| 9 | [State](09-state.md) | Thay đổi behavior khi state thay đổi | State machine, Workflow |
 
 ### Structural Patterns (Kết Cấu)
 
@@ -27,6 +26,7 @@ Tập hợp 10 design patterns cơ bản và thường dùng nhất trong phát 
 |---|---------|---------|---------|
 | 6 | [Decorator](06-decorator.md) | Thêm functionality vào object động | Add features without modification |
 | 7 | [Adapter](07-adapter.md) | Chuyển đổi interface incompatible | Legacy system integration, Format conversion |
+| 8 | [Proxy](08-proxy.md) | Kiểm soát truy cập tới object | Lazy loading, Access control, Logging |
 | 10 | [Facade](10-facade.md) | Simplified interface cho subsystem phức tạp | Reduce complexity, Hide subsystem details |
 
 ---
@@ -61,13 +61,13 @@ Tập hợp 10 design patterns cơ bản và thường dùng nhất trong phát 
 - ✅ Tích hợp legacy code
 - ✅ Bridge giữa 2 interfaces khác nhau
 
-### 8. **Command** - Encapsulate Actions
-- ✅ Undo/Redo functionality
-- ✅ Job scheduling & queuing
+### 8. **Proxy** - Kiểm Soát Truy Cập
+- ✅ Lazy loading resource nặng
+- ✅ Access control & Logging
 
-### 9. **State** - Behavior theo State
-- ✅ State machine implementation
-- ✅ Workflow processing
+### 9. **Abstract Factory** - Tạo Họ Object
+- ✅ Cross-platform UI (Windows/Mac)
+- ✅ Database abstraction (SQL/Mongo)
 
 ### 10. **Facade** - Giản Lược Interface
 - ✅ Ẩn complexity của subsystem
@@ -79,9 +79,9 @@ Tập hợp 10 design patterns cơ bản và thường dùng nhất trong phát 
 
 **Khi cần tạo object:** Singleton, Factory, Builder
 
-**Khi cần thay đổi hành vi:** Strategy, State, Command
+**Khi cần thay đổi hành vi:** Strategy, Abstract Factory
 
-**Khi cần thêm chức năng:** Decorator, Adapter, Facade
+**Khi cần thêm chức năng:** Decorator, Adapter, Proxy, Facade
 
 **Khi cần giao tiếp object:** Observer
 
@@ -98,8 +98,8 @@ design/
 ├── 05-observer.md       # Notify on state changes
 ├── 06-decorator.md      # Add features dynamically
 ├── 07-adapter.md        # Convert incompatible interfaces
-├── 08-command.md        # Encapsulate actions
-├── 09-state.md          # Change behavior based on state
+├── 08-proxy.md          # Control access to objects
+├── 09-abstract-factory.md # Create families of related objects
 ├── 10-facade.md         # Simplify complex subsystems
 └── README.md            # This file
 ```
