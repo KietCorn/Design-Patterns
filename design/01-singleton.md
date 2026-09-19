@@ -13,77 +13,76 @@
 Dùng static field hoặc lazy initialization để tạo instance duy nhất. Ẩn constructor để ngăn tạo instance mới.
 
 ## Bài toán 1: Database Connection
-```javascript
+```csharp
 class Database {
-  static instance = null;
-
-  constructor() {
-    if (Database.instance) return Database.instance;
-    this.connection = "Connected to DB";
-    Database.instance = this;
-  }
-
-  query(sql) {
-    return `Executing: ${sql}`;
-  }
+    private static Database instance;
+    
+    private Database() { }
+    
+    public static Database GetInstance() {
+        if (instance == null) {
+            instance = new Database();
+        }
+        return instance;
+    }
 }
 
-const db1 = new Database();
-const db2 = new Database();
-console.log(db1 === db2); // true
-console.log(db1.query("SELECT * FROM users"));
+var db1 = Database.GetInstance();
+var db2 = Database.GetInstance();
+Console.WriteLine(db1 == db2); // True - cùng 1 instance
 ```
 
 ## Bài toán 2: Logger
-```javascript
+```csharp
 class Logger {
-  constructor() {
-    if (Logger.instance) return Logger.instance;
-    this.logs = [];
-    Logger.instance = this;
-  }
-
-  log(message) {
-    this.logs.push(`[${new Date().toISOString()}] ${message}`);
-  }
-
-  getLogs() {
-    return this.logs;
-  }
+    private static Logger instance;
+    private List<string> logs = new();
+    
+    private Logger() { }
+    
+    public static Logger GetInstance() {
+        if (instance == null) {
+            instance = new Logger();
+        }
+        return instance;
+    }
+    
+    public void Log(string msg) {
+        logs.Add(msg);
+    }
 }
 
-const logger1 = new Logger();
-const logger2 = new Logger();
-logger1.log("User login");
-logger2.log("User logout");
-console.log(logger2.getLogs()); // Cả 2 log từ logger1 và logger2
+var log1 = Logger.GetInstance();
+var log2 = Logger.GetInstance();
+log1.Log("Event 1");
+log2.Log("Event 2");
+// Cùng 1 instance
 ```
 
-## Bài toán 3: Configuration Manager
-```javascript
-class Config {
-  constructor() {
-    if (Config.instance) return Config.instance;
-    this.settings = {
-      apiUrl: "https://api.example.com",
-      timeout: 5000,
-      debug: false
-    };
-    Config.instance = this;
-  }
-
-  get(key) {
-    return this.settings[key];
-  }
-
-  set(key, value) {
-    this.settings[key] = value;
-  }
+## Bài toán 3: App Settings
+```csharp
+class Settings {
+    private static Settings instance;
+    private Dictionary<string, string> data = new();
+    
+    private Settings() {
+        data["theme"] = "dark";
+        data["lang"] = "en";
+    }
+    
+    public static Settings GetInstance() {
+        if (instance == null) {
+            instance = new Settings();
+        }
+        return instance;
+    }
+    
+    public string Get(string key) => data[key];
+    public void Set(string key, string val) => data[key] = val;
 }
 
-const config = new Config();
-console.log(config.get("apiUrl")); // https://api.example.com
-config.set("debug", true);
-const config2 = new Config();
-console.log(config2.get("debug")); // true - cùng instance
+var s1 = Settings.GetInstance();
+var s2 = Settings.GetInstance();
+s1.Set("theme", "light");
+Console.WriteLine(s2.Get("theme")); // light
 ```

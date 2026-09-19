@@ -1,118 +1,87 @@
 # Factory Pattern
 
 ## Mục đích
+
 Tạo object mà không cần chỉ định class cụ thể. Factory sẽ chọn class phù hợp dựa trên input.
 
 ## Khi nào dùng
+
 - Tạo nhiều loại object từ cùng một base class
 - Giảm dependency giữa client code và concrete classes
 - Khi class nào được dùng được quyết định lúc runtime
 
 ## Cách dùng
+
 Tạo factory function hoặc factory class nhận parameter và trả về instance của class phù hợp.
 
 ## Bài toán 1: Transport Factory
-```javascript
-class Car {
-  drive() {
-    return "🚗 Driving car...";
-  }
-}
 
-class Bike {
-  drive() {
-    return "🏍️ Riding bike...";
-  }
-}
+```csharp
+interface ITransport { string Drive(); }
 
-class Truck {
-  drive() {
-    return "🚙 Driving truck...";
-  }
+class Car : ITransport { 
+    public string Drive() => "car"; 
+}
+class Bike : ITransport { 
+    public string Drive() => "bike"; 
 }
 
 class TransportFactory {
-  static create(type) {
-    switch(type) {
-      case "car": return new Car();
-      case "bike": return new Bike();
-      case "truck": return new Truck();
-      default: throw new Error("Unknown transport");
+    public static ITransport Create(string type) {
+        if (type == "car") return new Car();
+        if (type == "bike") return new Bike();
+        return null;
     }
-  }
 }
 
-const car = TransportFactory.create("car");
-console.log(car.drive()); // 🚗 Driving car...
+var car = TransportFactory.Create("car");
+Console.WriteLine(car.Drive()); // car
 ```
 
 ## Bài toán 2: Payment Method Factory
-```javascript
-class CreditCard {
-  pay(amount) {
-    return `Paid ${amount}$ with Credit Card`;
-  }
-}
 
-class PayPal {
-  pay(amount) {
-    return `Paid ${amount}$ with PayPal`;
-  }
-}
+```csharp
+interface IPayment { string Pay(int money); }
 
-class Bitcoin {
-  pay(amount) {
-    return `Paid ${amount}$ with Bitcoin`;
-  }
+class Card : IPayment { 
+    public string Pay(int m) => $"Card paid {m}"; 
+}
+class PayPal : IPayment { 
+    public string Pay(int m) => $"PayPal paid {m}"; 
 }
 
 class PaymentFactory {
-  static create(method) {
-    const methods = {
-      "card": () => new CreditCard(),
-      "paypal": () => new PayPal(),
-      "crypto": () => new Bitcoin()
-    };
-    return methods[method]?.() || null;
-  }
+    public static IPayment Create(string method) {
+        if (method == "card") return new Card();
+        if (method == "paypal") return new PayPal();
+        return null;
+    }
 }
 
-const payment = PaymentFactory.create("paypal");
-console.log(payment.pay(100)); // Paid 100$ with PayPal
+var pay = PaymentFactory.Create("paypal");
+Console.WriteLine(pay.Pay(100)); // PayPal paid 100
 ```
 
-## Bài toán 3: Database Connection Factory
-```javascript
-class MySQLConnection {
-  connect() {
-    return "Connected to MySQL";
-  }
+## Bài toán 3: Animal Factory
+
+```csharp
+interface IAnimal { string Sound(); }
+
+class Dog : IAnimal { 
+    public string Sound() => "Woof"; 
+}
+class Cat : IAnimal { 
+    public string Sound() => "Meow"; 
 }
 
-class PostgresConnection {
-  connect() {
-    return "Connected to PostgreSQL";
-  }
+class AnimalFactory {
+    public static IAnimal Create(string type) {
+        if (type == "dog") return new Dog();
+        if (type == "cat") return new Cat();
+        return null;
+    }
 }
 
-class MongoConnection {
-  connect() {
-    return "Connected to MongoDB";
-  }
-}
-
-class DBFactory {
-  static create(dbType) {
-    const connections = {
-      "mysql": () => new MySQLConnection(),
-      "postgres": () => new PostgresConnection(),
-      "mongo": () => new MongoConnection()
-    };
-    const Connection = connections[dbType];
-    return Connection ? new Connection() : null;
-  }
-}
-
-const db = DBFactory.create("postgres");
-console.log(db.connect()); // Connected to PostgreSQL
+var dog = AnimalFactory.Create("dog");
+Console.WriteLine(dog.Sound()); // Woof
 ```

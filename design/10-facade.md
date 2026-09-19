@@ -12,177 +12,94 @@ Cung cấp unified, simplified interface tới một set của interfaces trong 
 ## Cách dùng
 Tạo Facade class wraps complex subsystem. Facade cung cấp simple methods delegate tới subsystem components.
 
-## Bài toán 1: Home Automation Facade
-```javascript
-class Light {
-  turnOn() {
-    return "Lights are on";
-  }
-
-  turnOff() {
-    return "Lights are off";
-  }
+## Bài toán 1: Home Automation
+```csharp
+class Light { 
+    public string On() => "Light ON"; 
+    public string Off() => "Light OFF"; 
 }
 
-class AC {
-  on() {
-    return "AC is on (22°C)";
-  }
-
-  off() {
-    return "AC is off";
-  }
+class AC { 
+    public string On() => "AC ON"; 
 }
 
-class SecuritySystem {
-  arm() {
-    return "Security system armed";
-  }
-
-  disarm() {
-    return "Security system disarmed";
-  }
+class Security { 
+    public string On() => "Security ON"; 
 }
 
-class HomeAutomationFacade {
-  constructor() {
-    this.light = new Light();
-    this.ac = new AC();
-    this.security = new SecuritySystem();
-  }
-
-  leaveHome() {
-    console.log(this.light.turnOff());
-    console.log(this.ac.off());
-    console.log(this.security.arm());
-  }
-
-  enterHome() {
-    console.log(this.security.disarm());
-    console.log(this.light.turnOn());
-    console.log(this.ac.on());
-  }
+class HomeFacade {
+    private Light light = new();
+    private AC ac = new();
+    private Security sec = new();
+    
+    public void Leave() {
+        Console.WriteLine("Leaving...");
+        Console.WriteLine(light.Off());
+        Console.WriteLine(ac.On());
+        Console.WriteLine(sec.On());
+    }
 }
 
-const home = new HomeAutomationFacade();
-console.log("--- Leaving Home ---");
-home.leaveHome();
-console.log("\n--- Entering Home ---");
-home.enterHome();
+var home = new HomeFacade();
+home.Leave();
 ```
 
-## Bài toán 2: Complex Database Facade
-```javascript
-class Database {
-  connect(config) {
-    return `Connected to ${config.host}`;
-  }
+## Bài toán 2: Database Setup
+```csharp
+class DB { 
+    public string Connect() => "DB connected"; 
 }
 
-class Cache {
-  initialize(config) {
-    return `Cache initialized on ${config.port}`;
-  }
+class Cache { 
+    public string Init() => "Cache ready"; 
 }
 
-class Logger {
-  setup(config) {
-    return `Logger setup with level: ${config.level}`;
-  }
+class Logger { 
+    public string Setup() => "Logger ready"; 
 }
 
-class DatabaseFacade {
-  constructor(config) {
-    this.config = config;
-    this.db = new Database();
-    this.cache = new Cache();
-    this.logger = new Logger();
-  }
-
-  initialize() {
-    console.log(this.db.connect(this.config.database));
-    console.log(this.cache.initialize(this.config.cache));
-    console.log(this.logger.setup(this.config.logger));
-    return "Database system initialized";
-  }
-
-  query(sql) {
-    this.logger.setup(this.config.logger);
-    return `Query executed: ${sql}`;
-  }
+class DBFacade {
+    private DB db = new();
+    private Cache cache = new();
+    private Logger log = new();
+    
+    public void Initialize() {
+        Console.WriteLine(db.Connect());
+        Console.WriteLine(cache.Init());
+        Console.WriteLine(log.Setup());
+    }
 }
 
-const config = {
-  database: { host: "localhost" },
-  cache: { port: 6379 },
-  logger: { level: "INFO" }
-};
-
-const facade = new DatabaseFacade(config);
-facade.initialize();
-console.log(facade.query("SELECT * FROM users"));
+var facade = new DBFacade();
+facade.Initialize();
 ```
 
-## Bài toán 3: Payment System Facade
-```javascript
-class CreditCardValidator {
-  validate(card) {
-    return card.number.length === 16 ? "Card valid" : "Card invalid";
-  }
+## Bài toán 3: Payment System
+```csharp
+class Validator { 
+    public bool Validate(string card) => card.Length > 0; 
 }
 
-class FraudDetector {
-  check(amount) {
-    return amount > 10000 ? "Fraud detected" : "No fraud detected";
-  }
+class Fraud { 
+    public bool Check(int money) => money <= 10000; 
 }
 
-class BankAPI {
-  transfer(amount, account) {
-    return `Transferred $${amount} to ${account}`;
-  }
+class Bank { 
+    public string Transfer(int money) => $"Transferred {money}"; 
 }
 
-class NotificationService {
-  sendEmail(email, message) {
-    return `Email sent to ${email}: ${message}`;
-  }
+class PayFacade {
+    private Validator v = new();
+    private Fraud f = new();
+    private Bank bank = new();
+    
+    public void Pay(string card, int money) {
+        if (!v.Validate(card)) return;
+        if (!f.Check(money)) return;
+        Console.WriteLine(bank.Transfer(money));
+    }
 }
 
-class PaymentFacade {
-  constructor() {
-    this.validator = new CreditCardValidator();
-    this.fraudDetector = new FraudDetector();
-    this.bank = new BankAPI();
-    this.notification = new NotificationService();
-  }
-
-  processPayment(card, amount, account, email) {
-    // Step 1: Validate card
-    const validation = this.validator.validate(card);
-    console.log(validation);
-    if (!validation.includes("valid")) return;
-
-    // Step 2: Check fraud
-    const fraud = this.fraudDetector.check(amount);
-    console.log(fraud);
-    if (fraud.includes("detected")) return;
-
-    // Step 3: Transfer money
-    const result = this.bank.transfer(amount, account);
-    console.log(result);
-
-    // Step 4: Send notification
-    const notification = this.notification.sendEmail(email, "Payment successful");
-    console.log(notification);
-  }
-}
-
-const payment = new PaymentFacade();
-payment.processPayment(
-  { number: "1234567890123456" },
-  500,
-  "user@bank.com",
-  "user@email.com"
-);
+var pay = new PayFacade();
+pay.Pay("1234", 100);
 ```

@@ -12,139 +12,86 @@
 Tạo interface/base class cho strategies. Implement nhiều strategies khác nhau. Client chọn strategy nào để dùng.
 
 ## Bài toán 1: Payment Strategy
-```javascript
-class CreditCardStrategy {
-  pay(amount) {
-    return `Paid ${amount}$ using Credit Card (secure)`;
-  }
+```csharp
+interface IPaymentStrategy {
+    string Pay(int money);
 }
 
-class PayPalStrategy {
-  pay(amount) {
-    return `Paid ${amount}$ using PayPal`;
-  }
+class CardPay : IPaymentStrategy {
+    public string Pay(int money) => $"Card: {money}";
+}
+class CashPay : IPaymentStrategy {
+    public string Pay(int money) => $"Cash: {money}";
 }
 
-class CashStrategy {
-  pay(amount) {
-    return `Paid ${amount}$ in Cash`;
-  }
+class Cart {
+    private IPaymentStrategy strategy;
+    
+    public Cart(IPaymentStrategy s) => strategy = s;
+    public void SetPayment(IPaymentStrategy s) => strategy = s;
+    public string Checkout(int money) => strategy.Pay(money);
 }
 
-class ShoppingCart {
-  constructor() {
-    this.items = [];
-    this.paymentStrategy = null;
-  }
-
-  setPaymentStrategy(strategy) {
-    this.paymentStrategy = strategy;
-  }
-
-  checkout() {
-    const total = this.items.reduce((sum, price) => sum + price, 0);
-    return this.paymentStrategy.pay(total);
-  }
-
-  addItem(price) {
-    this.items.push(price);
-  }
-}
-
-const cart = new ShoppingCart();
-cart.addItem(50);
-cart.addItem(30);
-
-cart.setPaymentStrategy(new CreditCardStrategy());
-console.log(cart.checkout()); // Paid 80$ using Credit Card (secure)
-
-cart.setPaymentStrategy(new CashStrategy());
-console.log(cart.checkout()); // Paid 80$ in Cash
+var cart = new Cart(new CardPay());
+Console.WriteLine(cart.Checkout(100)); // Card: 100
+cart.SetPayment(new CashPay());
+Console.WriteLine(cart.Checkout(100)); // Cash: 100
 ```
 
 ## Bài toán 2: Compression Strategy
-```javascript
-class ZipCompression {
-  compress(file) {
-    return `[ZIP] Compressed ${file}`;
-  }
+```csharp
+interface ICompression {
+    string Compress(string file);
 }
 
-class RarCompression {
-  compress(file) {
-    return `[RAR] Compressed ${file}`;
-  }
+class ZipComp : ICompression {
+    public string Compress(string f) => $"ZIP: {f}";
+}
+class RarComp : ICompression {
+    public string Compress(string f) => $"RAR: {f}";
 }
 
-class GzipCompression {
-  compress(file) {
-    return `[GZIP] Compressed ${file}`;
-  }
+class Archiver {
+    private ICompression comp;
+    
+    public Archiver(ICompression c) => comp = c;
+    public void SetComp(ICompression c) => comp = c;
+    public string Archive(string f) => comp.Compress(f);
 }
 
-class FileArchiver {
-  constructor(compression) {
-    this.compression = compression;
-  }
-
-  setCompression(compression) {
-    this.compression = compression;
-  }
-
-  archive(file) {
-    return this.compression.compress(file);
-  }
-}
-
-const archiver = new FileArchiver(new ZipCompression());
-console.log(archiver.archive("document.pdf")); // [ZIP] Compressed document.pdf
-
-archiver.setCompression(new GzipCompression());
-console.log(archiver.archive("document.pdf")); // [GZIP] Compressed document.pdf
+var arch = new Archiver(new ZipComp());
+Console.WriteLine(arch.Archive("file.txt")); // ZIP: file.txt
+arch.SetComp(new RarComp());
+Console.WriteLine(arch.Archive("file.txt")); // RAR: file.txt
 ```
 
-## Bài toán 3: Sorting Strategy
-```javascript
-class AscendingSort {
-  sort(arr) {
-    return [...arr].sort((a, b) => a - b);
-  }
+## Bài toán 3: Sort Strategy
+```csharp
+interface ISortStrategy {
+    List<int> Sort(List<int> arr);
 }
 
-class DescendingSort {
-  sort(arr) {
-    return [...arr].sort((a, b) => b - a);
-  }
+class SortAsc : ISortStrategy {
+    public List<int> Sort(List<int> arr) {
+        var result = new List<int>(arr);
+        result.Sort();
+        return result;
+    }
+}
+class SortDesc : ISortStrategy {
+    public List<int> Sort(List<int> arr) {
+        var result = new List<int>(arr);
+        result.Sort((a, b) => b.CompareTo(a));
+        return result;
+    }
 }
 
-class RandomSort {
-  sort(arr) {
-    return [...arr].sort(() => Math.random() - 0.5);
-  }
+class Sorter {
+    private ISortStrategy strat;
+    public Sorter(ISortStrategy s) => strat = s;
+    public List<int> Execute(List<int> arr) => strat.Sort(arr);
 }
 
-class DataSorter {
-  constructor(strategy) {
-    this.strategy = strategy;
-  }
-
-  setSortStrategy(strategy) {
-    this.strategy = strategy;
-  }
-
-  execute(data) {
-    return this.strategy.sort(data);
-  }
-}
-
-const data = [5, 2, 8, 1, 9];
-const sorter = new DataSorter(new AscendingSort());
-
-console.log(sorter.execute(data)); // [1, 2, 5, 8, 9]
-
-sorter.setSortStrategy(new DescendingSort());
-console.log(sorter.execute(data)); // [9, 8, 5, 2, 1]
-
-sorter.setSortStrategy(new RandomSort());
-console.log(sorter.execute(data)); // [random order]
+var s = new Sorter(new SortAsc());
+Console.WriteLine(string.Join(",", s.Execute(new List<int> { 5, 2, 8 }))); // 2,5,8
 ```

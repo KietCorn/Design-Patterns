@@ -13,167 +13,98 @@ Tách quá trình tạo object phức tạp khỏi đại diện của nó, cho 
 Tạo Builder class có method để set từng thuộc tính, rồi gọi `build()` để tạo object cuối cùng.
 
 ## Bài toán 1: Pizza Builder
-```javascript
+```csharp
 class Pizza {
-  constructor(builder) {
-    this.size = builder.size;
-    this.crust = builder.crust;
-    this.sauce = builder.sauce;
-    this.toppings = builder.toppings;
-  }
-
-  describe() {
-    return `${this.size} pizza with ${this.crust} crust, ${this.sauce} sauce, ${this.toppings.join(", ")}`;
-  }
+    public string Size { get; set; }
+    public string Crust { get; set; }
+    public List<string> Toppings { get; set; }
 }
 
 class PizzaBuilder {
-  constructor(size = "medium") {
-    this.size = size;
-    this.crust = "thin";
-    this.sauce = "tomato";
-    this.toppings = [];
-  }
-
-  setCrust(crust) {
-    this.crust = crust;
-    return this;
-  }
-
-  setSauce(sauce) {
-    this.sauce = sauce;
-    return this;
-  }
-
-  addTopping(topping) {
-    this.toppings.push(topping);
-    return this;
-  }
-
-  build() {
-    return new Pizza(this);
-  }
+    private string size = "medium";
+    private string crust = "thin";
+    private List<string> toppings = new();
+    
+    public PizzaBuilder AddSize(string s) { 
+        size = s; return this; 
+    }
+    public PizzaBuilder AddCrust(string c) { 
+        crust = c; return this; 
+    }
+    public PizzaBuilder AddTopping(string t) { 
+        toppings.Add(t); return this; 
+    }
+    
+    public Pizza Build() {
+        return new Pizza { Size = size, Crust = crust, Toppings = toppings };
+    }
 }
 
-const pizza = new PizzaBuilder("large")
-  .setCrust("thick")
-  .setSauce("pesto")
-  .addTopping("cheese")
-  .addTopping("pepperoni")
-  .build();
-
-console.log(pizza.describe());
-// large pizza with thick crust, pesto sauce, cheese, pepperoni
+var pizza = new PizzaBuilder()
+    .AddSize("large")
+    .AddCrust("thick")
+    .AddTopping("cheese")
+    .Build();
 ```
 
 ## Bài toán 2: HTTP Request Builder
-```javascript
+```csharp
 class HttpRequest {
-  constructor(builder) {
-    this.method = builder.method;
-    this.url = builder.url;
-    this.headers = builder.headers;
-    this.body = builder.body;
-  }
-
-  toString() {
-    return `${this.method} ${this.url}\nHeaders: ${JSON.stringify(this.headers)}\nBody: ${this.body}`;
-  }
+    public string Method { get; set; }
+    public string Url { get; set; }
+    public Dictionary<string, string> Headers { get; set; }
 }
 
 class RequestBuilder {
-  constructor(url) {
-    this.url = url;
-    this.method = "GET";
-    this.headers = {};
-    this.body = null;
-  }
-
-  setMethod(method) {
-    this.method = method;
-    return this;
-  }
-
-  setHeader(key, value) {
-    this.headers[key] = value;
-    return this;
-  }
-
-  setBody(body) {
-    this.body = body;
-    return this;
-  }
-
-  build() {
-    return new HttpRequest(this);
-  }
+    private string url;
+    private string method = "GET";
+    private Dictionary<string, string> headers = new();
+    
+    public RequestBuilder(string u) => url = u;
+    
+    public RequestBuilder SetMethod(string m) { 
+        method = m; return this; 
+    }
+    public RequestBuilder SetHeader(string k, string v) { 
+        headers[k] = v; return this; 
+    }
+    
+    public HttpRequest Build() {
+        return new HttpRequest { Method = method, Url = url, Headers = headers };
+    }
 }
 
-const req = new RequestBuilder("https://api.example.com/users")
-  .setMethod("POST")
-  .setHeader("Content-Type", "application/json")
-  .setHeader("Authorization", "Bearer token123")
-  .setBody({ name: "John", age: 30 })
-  .build();
-
-console.log(req.toString());
+var req = new RequestBuilder("/users")
+    .SetMethod("POST")
+    .SetHeader("token", "abc123")
+    .Build();
 ```
 
-## Bài toán 3: House Builder
-```javascript
-class House {
-  constructor(builder) {
-    this.foundation = builder.foundation;
-    this.walls = builder.walls;
-    this.roof = builder.roof;
-    this.windows = builder.windows;
-    this.door = builder.door;
-  }
-
-  describe() {
-    return `House: ${this.foundation}, ${this.walls}, ${this.roof}, ${this.windows} windows, ${this.door}`;
-  }
+## Bài toán 3: Computer Builder
+```csharp
+class Computer {
+    public string CPU { get; set; }
+    public string RAM { get; set; }
+    public string GPU { get; set; }
 }
 
-class HouseBuilder {
-  foundation(type) {
-    this.foundation = type;
-    return this;
-  }
-
-  walls(type) {
-    this.walls = type;
-    return this;
-  }
-
-  roof(type) {
-    this.roof = type;
-    return this;
-  }
-
-  windows(count) {
-    this.windows = count;
-    return this;
-  }
-
-  door(type) {
-    this.door = type;
-    return this;
-  }
-
-  build() {
-    return new House(this);
-  }
+class ComputerBuilder {
+    private string cpu = "Intel";
+    private string ram = "8GB";
+    private string gpu = "None";
+    
+    public ComputerBuilder SetCPU(string c) { cpu = c; return this; }
+    public ComputerBuilder SetRAM(string r) { ram = r; return this; }
+    public ComputerBuilder SetGPU(string g) { gpu = g; return this; }
+    
+    public Computer Build() {
+        return new Computer { CPU = cpu, RAM = ram, GPU = gpu };
+    }
 }
 
-const house = new HouseBuilder()
-  .foundation("concrete")
-  .walls("brick")
-  .roof("tile")
-  .windows(8)
-  .door("wooden")
-  .build();
-
-console.log(house.describe());
-// House: concrete, brick, tile, 8 windows, wooden
+var pc = new ComputerBuilder()
+    .SetCPU("AMD")
+    .SetRAM("16GB")
+    .SetGPU("RTX3080")
+    .Build();
 ```

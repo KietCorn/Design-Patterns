@@ -13,154 +13,89 @@
 Subject giữ list observers và notify họ khi state thay đổi. Observers subscribe/unsubscribe từ Subject.
 
 ## Bài toán 1: Stock Price Alert
-```javascript
+```csharp
+interface IObserver {
+    void Notify(int price);
+}
+
 class Stock {
-  constructor(symbol) {
-    this.symbol = symbol;
-    this.price = 0;
-    this.observers = [];
-  }
-
-  subscribe(observer) {
-    if (!this.observers.includes(observer)) {
-      this.observers.push(observer);
+    private int price;
+    private List<IObserver> observers = new();
+    
+    public void Subscribe(IObserver obs) => observers.Add(obs);
+    
+    public void SetPrice(int p) {
+        price = p;
+        observers.ForEach(o => o.Notify(price));
     }
-  }
-
-  unsubscribe(observer) {
-    this.observers = this.observers.filter(obs => obs !== observer);
-  }
-
-  setPrice(newPrice) {
-    if (this.price !== newPrice) {
-      this.price = newPrice;
-      this.notify();
-    }
-  }
-
-  notify() {
-    this.observers.forEach(observer => observer.update(this));
-  }
 }
 
-class Investor {
-  constructor(name) {
-    this.name = name;
-  }
-
-  update(stock) {
-    console.log(`${this.name} received alert: ${stock.symbol} is now $${stock.price}`);
-  }
+class Investor : IObserver {
+    private string name;
+    public Investor(string n) => name = n;
+    public void Notify(int price) => Console.WriteLine($"{name}: ${price}");
 }
 
-const apple = new Stock("AAPL");
-const investor1 = new Investor("Alice");
-const investor2 = new Investor("Bob");
-
-apple.subscribe(investor1);
-apple.subscribe(investor2);
-
-apple.setPrice(150); // Both investors get notified
+var stock = new Stock();
+stock.Subscribe(new Investor("Alice"));
+stock.Subscribe(new Investor("Bob"));
+stock.SetPrice(150);
 ```
 
-## Bài toán 2: Weather Monitoring
-```javascript
-class WeatherStation {
-  constructor() {
-    this.temperature = 0;
-    this.humidity = 0;
-    this.subscribers = [];
-  }
-
-  subscribe(subscriber) {
-    this.subscribers.push(subscriber);
-  }
-
-  unsubscribe(subscriber) {
-    this.subscribers = this.subscribers.filter(sub => sub !== subscriber);
-  }
-
-  setData(temp, humidity) {
-    this.temperature = temp;
-    this.humidity = humidity;
-    this.notifySubscribers();
-  }
-
-  notifySubscribers() {
-    this.subscribers.forEach(sub => sub.update({
-      temp: this.temperature,
-      humidity: this.humidity
-    }));
-  }
+## Bài toán 2: Weather Update
+```csharp
+interface IObserver {
+    void Update(int temp);
 }
 
-class Display {
-  constructor(name) {
-    this.name = name;
-  }
-
-  update(data) {
-    console.log(`${this.name}: Temperature=${data.temp}°C, Humidity=${data.humidity}%`);
-  }
+class Weather {
+    private int temp;
+    private List<IObserver> subs = new();
+    
+    public void Subscribe(IObserver sub) => subs.Add(sub);
+    
+    public void SetTemp(int t) {
+        temp = t;
+        subs.ForEach(s => s.Update(temp));
+    }
 }
 
-const station = new WeatherStation();
-const phone = new Display("Phone");
-const tv = new Display("TV");
+class Phone : IObserver {
+    private string name;
+    public Phone(string n) => name = n;
+    public void Update(int temp) => Console.WriteLine($"{name}: {temp}°C");
+}
 
-station.subscribe(phone);
-station.subscribe(tv);
-
-station.setData(25, 60);
-// Both display devices show the weather
+var w = new Weather();
+w.Subscribe(new Phone("Phone1"));
+w.Subscribe(new Phone("Phone2"));
+w.SetTemp(25);
 ```
 
-## Bài toán 3: Comment Notification System
-```javascript
-class BlogPost {
-  constructor(title) {
-    this.title = title;
-    this.comments = [];
-    this.followers = [];
-  }
-
-  addFollower(follower) {
-    this.followers.push(follower);
-  }
-
-  removeFollower(follower) {
-    this.followers = this.followers.filter(f => f !== follower);
-  }
-
-  addComment(comment) {
-    this.comments.push(comment);
-    this.notifyFollowers(comment);
-  }
-
-  notifyFollowers(comment) {
-    this.followers.forEach(follower => {
-      follower.onNewComment(this.title, comment);
-    });
-  }
+## Bài toán 3: Post Comments
+```csharp
+interface IFollower {
+    void Alert(string msg);
 }
 
-class User {
-  constructor(name) {
-    this.name = name;
-  }
-
-  onNewComment(postTitle, comment) {
-    console.log(`${this.name} notified: New comment on "${postTitle}": ${comment}`);
-  }
+class Post {
+    private List<IFollower> followers = new();
+    
+    public void Follow(IFollower f) => followers.Add(f);
+    
+    public void NewComment(string comment) {
+        followers.ForEach(f => f.Alert(comment));
+    }
 }
 
-const post = new BlogPost("Design Patterns");
-const user1 = new User("Alice");
-const user2 = new User("Bob");
+class User : IFollower {
+    private string name;
+    public User(string n) => name = n;
+    public void Alert(string msg) => Console.WriteLine($"{name}: {msg}");
+}
 
-post.addFollower(user1);
-post.addFollower(user2);
-
-post.addComment("Great article!");
-post.addComment("Very helpful!");
+var post = new Post();
+post.Follow(new User("A"));
+post.Follow(new User("B"));
+post.NewComment("Hello!");
 ```

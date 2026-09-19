@@ -12,189 +12,116 @@ Cho phép một object thay đổi behavior khi internal state thay đổi. Obje
 ## Cách dùng
 Tạo State interface/abstract class. Implement concrete states. Context delegate behavior tới current state object.
 
-## Bài toán 1: Traffic Light State Machine
-```javascript
-class State {
-  execute(trafficLight) {}
+## Bài toán 1: Traffic Light
+```csharp
+interface IState {
+    void Execute(Light light);
 }
 
-class RedLight extends State {
-  execute(trafficLight) {
-    console.log("🔴 STOP - Red Light");
-    return "Go to Green";
-  }
+class RedLight : IState {
+    public void Execute(Light light) {
+        Console.WriteLine("STOP");
+        light.SetState(new GreenLight());
+    }
 }
 
-class YellowLight extends State {
-  execute(trafficLight) {
-    console.log("🟡 WAIT - Yellow Light");
-    return "Go to Red";
-  }
+class GreenLight : IState {
+    public void Execute(Light light) {
+        Console.WriteLine("GO");
+        light.SetState(new YellowLight());
+    }
 }
 
-class GreenLight extends State {
-  execute(trafficLight) {
-    console.log("🟢 GO - Green Light");
-    return "Go to Yellow";
-  }
+class YellowLight : IState {
+    public void Execute(Light light) {
+        Console.WriteLine("WAIT");
+        light.SetState(new RedLight());
+    }
 }
 
-class TrafficLight {
-  constructor() {
-    this.state = new RedLight();
-  }
-
-  setState(state) {
-    this.state = state;
-  }
-
-  change() {
-    this.state.execute(this);
-  }
+class Light {
+    private IState state;
+    public Light() => state = new RedLight();
+    public void SetState(IState s) => state = s;
+    public void Change() => state.Execute(this);
 }
 
-const light = new TrafficLight();
-light.change(); // 🔴 STOP - Red Light
-light.setState(new GreenLight());
-light.change(); // 🟢 GO - Green Light
-light.setState(new YellowLight());
-light.change(); // 🟡 WAIT - Yellow Light
+var light = new Light();
+light.Change(); // STOP
+light.Change(); // GO
+light.Change(); // WAIT
 ```
 
-## Bài toán 2: Order Processing States
-```javascript
-class OrderState {
-  handle(order) {}
+## Bài toán 2: Order Status
+```csharp
+interface IState {
+    void Handle(Order order);
 }
 
-class PendingState extends OrderState {
-  handle(order) {
-    console.log("📦 Order is pending...");
-    order.setState(new ProcessingState());
-  }
+class Pending : IState {
+    public void Handle(Order order) {
+        Console.WriteLine("Pending");
+        order.SetState(new Processing());
+    }
 }
 
-class ProcessingState extends OrderState {
-  handle(order) {
-    console.log("⚙️ Order is being processed...");
-    order.setState(new ShippedState());
-  }
+class Processing : IState {
+    public void Handle(Order order) {
+        Console.WriteLine("Processing");
+        order.SetState(new Shipped());
+    }
 }
 
-class ShippedState extends OrderState {
-  handle(order) {
-    console.log("📮 Order has been shipped!");
-    order.setState(new DeliveredState());
-  }
-}
-
-class DeliveredState extends OrderState {
-  handle(order) {
-    console.log("✅ Order has been delivered!");
-  }
+class Shipped : IState {
+    public void Handle(Order order) => Console.WriteLine("Shipped");
 }
 
 class Order {
-  constructor() {
-    this.state = new PendingState();
-  }
-
-  setState(state) {
-    this.state = state;
-  }
-
-  process() {
-    this.state.handle(this);
-  }
+    private IState state;
+    public Order() => state = new Pending();
+    public void SetState(IState s) => state = s;
+    public void Next() => state.Handle(this);
 }
 
-const order = new Order();
-order.process(); // 📦 Order is pending...
-order.process(); // ⚙️ Order is being processed...
-order.process(); // 📮 Order has been shipped!
-order.process(); // ✅ Order has been delivered!
+var order = new Order();
+order.Next(); // Pending
+order.Next(); // Processing
+order.Next(); // Shipped
 ```
 
-## Bài toán 3: Media Player States
-```javascript
-class MediaState {
-  play(player) {}
-  pause(player) {}
-  stop(player) {}
+## Bài toán 3: Media Player
+```csharp
+interface IState {
+    void Play(Player p);
+    void Pause(Player p);
 }
 
-class PlayingState extends MediaState {
-  play(player) {
-    console.log("Already playing");
-  }
-
-  pause(player) {
-    console.log("▶️➡️⏸️  Pausing...");
-    player.setState(new PausedState());
-  }
-
-  stop(player) {
-    console.log("⏹️ Stopping...");
-    player.setState(new StoppedState());
-  }
+class Playing : IState {
+    public void Play(Player p) => Console.WriteLine("Already playing");
+    public void Pause(Player p) {
+        Console.WriteLine("Pausing");
+        p.SetState(new Paused());
+    }
 }
 
-class PausedState extends MediaState {
-  play(player) {
-    console.log("⏸️➡️▶️  Resuming...");
-    player.setState(new PlayingState());
-  }
-
-  pause(player) {
-    console.log("Already paused");
-  }
-
-  stop(player) {
-    console.log("⏹️ Stopping...");
-    player.setState(new StoppedState());
-  }
+class Paused : IState {
+    public void Play(Player p) {
+        Console.WriteLine("Playing");
+        p.SetState(new Playing());
+    }
+    public void Pause(Player p) => Console.WriteLine("Already paused");
 }
 
-class StoppedState extends MediaState {
-  play(player) {
-    console.log("▶️ Playing...");
-    player.setState(new PlayingState());
-  }
-
-  pause(player) {
-    console.log("Cannot pause - not playing");
-  }
-
-  stop(player) {
-    console.log("Already stopped");
-  }
+class Player {
+    private IState state;
+    public Player() => state = new Paused();
+    public void SetState(IState s) => state = s;
+    public void Play() => state.Play(this);
+    public void Pause() => state.Pause(this);
 }
 
-class MediaPlayer {
-  constructor() {
-    this.state = new StoppedState();
-  }
-
-  setState(state) {
-    this.state = state;
-  }
-
-  play() {
-    this.state.play(this);
-  }
-
-  pause() {
-    this.state.pause(this);
-  }
-
-  stop() {
-    this.state.stop(this);
-  }
-}
-
-const player = new MediaPlayer();
-player.play();   // ▶️ Playing...
-player.pause();  // ▶️➡️⏸️  Pausing...
-player.play();   // ⏸️➡️▶️  Resuming...
-player.stop();   // ⏹️ Stopping...
+var player = new Player();
+player.Play();   // Playing
+player.Pause();  // Pausing
+player.Play();   // Playing
 ```

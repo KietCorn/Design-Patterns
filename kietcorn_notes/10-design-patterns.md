@@ -19,7 +19,7 @@ Tưởng tượng một đất nước chỉ có **một Tổng thống** tại 
 - **Bài toán**: Ứng dụng cần quản lý kết nối đến database. Nếu mỗi lần cần truy vấn lại tạo ra một connection mới, ứng dụng sẽ tốn tài nguyên, tạo hàng trăm kết nối đồng thời, dễ gây quá tải database.
 - **Cách Singleton giải quyết**: Tạo một `DatabaseConnection` Singleton — lần đầu gọi thì khởi tạo kết nối, các lần sau đều trả về đúng object kết nối đó, đảm bảo chỉ có một kết nối duy nhất được dùng.
 
-**Ví dụ 2**
+**gồmVí dụ 2**
 
 - **Bài toán**: Ứng dụng cần một hệ thống logging ghi log ra file. Nếu nhiều class đều tự tạo Logger riêng, log có thể bị ghi chồng chéo, mất thứ tự, hoặc nhiều file log xuất hiện không kiểm soát được.
 - **Cách Singleton giải quyết**: Class `Logger` là Singleton — mọi nơi trong ứng dụng đều gọi `Logger.getInstance()` và ghi vào cùng một luồng log duy nhất, đảm bảo thứ tự và tính nhất quán.
@@ -927,15 +927,15 @@ Observer giải quyết bài toán một object cần thông báo cho nhiều ob
 
 ## BẢNG GHI NHỚ NHANH
 
-| Tên Pattern | 1 câu ghi nhớ ngắn gọn |
-|---|---|
-| **Singleton** | Chỉ một instance duy nhất — mọi nơi gọi đều trả về cùng một object. |
-| **Factory Method** | Subclass quyết định tạo **loại** object nào — lớp cha không cần biết. |
-| **Abstract Factory** | Tạo cả **họ** object tương thích nhau — đổi factory là đổi cả bộ. |
-| **Builder** | Xây object phức tạp **từng bước** — đặc biệt tốt khi có nhiều field tùy chọn. |
-| **Prototype** | Tạo object mới bằng cách **clone** — không khởi tạo lại từ đầu. |
-| **Adapter** | **Chuyển đổi** interface không tương thích — như bộ chuyển phích cắm. |
-| **Facade** | **Đơn giản hóa** hệ thống phức tạp sau một interface duy nhất, dễ dùng. |
-| **Decorator** | **Bọc thêm lớp** tính năng vào object mà không thay đổi class gốc. |
-| **Strategy** | **Hoán đổi thuật toán** tại runtime — tách "cái gì" ra khỏi "làm thế nào". |
-| **Observer** | **Tự động thông báo** — Subject phát, Observer nhận, không cần biết nhau. |
+| Tên Pattern               | 1 câu ghi nhớ ngắn gọn                                                                        |
+| -------------------------- | ------------------------------------------------------------------------------------------------- |
+| **Singleton**        | Chỉ một instance duy nhất — mọi nơi gọi đều trả về cùng một object.                  |
+| **Factory Method**   | Subclass quyết định tạo**loại** object nào — lớp cha không cần biết.             |
+| **Abstract Factory** | Tạo cả**họ** object tương thích nhau — đổi factory là đổi cả bộ.              |
+| **Builder**          | Xây object phức tạp**từng bước** — đặc biệt tốt khi có nhiều field tùy chọn. |
+| **Prototype**        | Tạo object mới bằng cách**clone** — không khởi tạo lại từ đầu.                  |
+| **Adapter**          | **Chuyển đổi** interface không tương thích — như bộ chuyển phích cắm.          |
+| **Facade**           | **Đơn giản hóa** hệ thống phức tạp sau một interface duy nhất, dễ dùng.         |
+| **Decorator**        | **Bọc thêm lớp** tính năng vào object mà không thay đổi class gốc.               |
+| **Strategy**         | **Hoán đổi thuật toán** tại runtime — tách "cái gì" ra khỏi "làm thế nào".    |
+| **Observer**         | **Tự động thông báo** — Subject phát, Observer nhận, không cần biết nhau.        |

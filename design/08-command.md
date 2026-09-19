@@ -13,188 +13,109 @@ Encapsulate một request thành một object, cho phép parameterize clients v�
 ## Cách dùng
 Command object encapsulate action và receiver. Invoker thực thi command. Client tạo command object.
 
-## Bài toán 1: Text Editor Undo/Redo
-```javascript
-class Document {
-  constructor() {
-    this.content = "";
-  }
-
-  write(text) {
-    this.content += text;
-  }
-
-  backspace() {
-    this.content = this.content.slice(0, -1);
-  }
+## Bài toán 1: Undo/Redo
+```csharp
+class Doc {
+    public string Text { get; set; } = "";
+    public void Add(string t) => Text += t;
+    public void Undo() => Text = Text.Remove(Text.Length - 1);
 }
 
-class Command {
-  execute() {}
-  undo() {}
+interface ICommand {
+    void Execute();
+    void Undo();
 }
 
-class WriteCommand extends Command {
-  constructor(document, text) {
-    super();
-    this.document = document;
-    this.text = text;
-  }
-
-  execute() {
-    this.document.write(this.text);
-  }
-
-  undo() {
-    this.document.backspace();
-  }
+class AddCmd : ICommand {
+    private Doc doc;
+    private string text;
+    
+    public AddCmd(Doc d, string t) { doc = d; text = t; }
+    public void Execute() => doc.Add(text);
+    public void Undo() => doc.Undo();
 }
 
-class CommandHistory {
-  constructor() {
-    this.history = [];
-  }
-
-  executeCommand(command) {
-    command.execute();
-    this.history.push(command);
-  }
-
-  undo() {
-    const command = this.history.pop();
-    if (command) command.undo();
-  }
+class History {
+    private List<ICommand> cmds = new();
+    
+    public void Execute(ICommand cmd) {
+        cmd.Execute();
+        cmds.Add(cmd);
+    }
+    
+    public void Undo() {
+        if (cmds.Count > 0) {
+            cmds.Last().Undo();
+            cmds.RemoveAt(cmds.Count - 1);
+        }
+    }
 }
 
-const doc = new Document();
-const history = new CommandHistory();
-
-history.executeCommand(new WriteCommand(doc, "Hello "));
-history.executeCommand(new WriteCommand(doc, "World"));
-console.log(doc.content); // Hello World
-
-history.undo();
-console.log(doc.content); // Hello 
+var doc = new Doc();
+var hist = new History();
+hist.Execute(new AddCmd(doc, "Hello "));
+hist.Execute(new AddCmd(doc, "World"));
+Console.WriteLine(doc.Text); // Hello World
+hist.Undo();
+Console.WriteLine(doc.Text); // Hello
 ```
 
-## Bài toán 2: Smart Home Control
-```javascript
+## Bài toán 2: Remote Control
+```csharp
 class Light {
-  turnOn() {
-    return "🔆 Light is ON";
-  }
-
-  turnOff() {
-    return "🌙 Light is OFF";
-  }
+    public string On() => "ON";
+    public string Off() => "OFF";
 }
 
-class Command {
-  execute() {}
+interface ICommand {
+    void Execute();
 }
 
-class TurnOnCommand extends Command {
-  constructor(light) {
-    super();
-    this.light = light;
-  }
-
-  execute() {
-    console.log(this.light.turnOn());
-  }
+class OnCmd : ICommand {
+    private Light light;
+    public OnCmd(Light l) => light = l;
+    public void Execute() => Console.WriteLine(light.On());
 }
 
-class TurnOffCommand extends Command {
-  constructor(light) {
-    super();
-    this.light = light;
-  }
-
-  execute() {
-    console.log(this.light.turnOff());
-  }
+class OffCmd : ICommand {
+    private Light light;
+    public OffCmd(Light l) => light = l;
+    public void Execute() => Console.WriteLine(light.Off());
 }
 
-class RemoteControl {
-  constructor() {
-    this.commands = {};
-  }
-
-  setCommand(button, command) {
-    this.commands[button] = command;
-  }
-
-  pressButton(button) {
-    if (this.commands[button]) {
-      this.commands[button].execute();
-    }
-  }
+class Remote {
+    private Dictionary<string, ICommand> cmds = new();
+    public void Set(string btn, ICommand cmd) => cmds[btn] = cmd;
+    public void Press(string btn) => cmds[btn]?.Execute();
 }
 
-const light = new Light();
-const remote = new RemoteControl();
-
-remote.setCommand("ON", new TurnOnCommand(light));
-remote.setCommand("OFF", new TurnOffCommand(light));
-
-remote.pressButton("ON");  // 🔆 Light is ON
-remote.pressButton("OFF"); // 🌙 Light is OFF
+var remote = new Remote();
+var light = new Light();
+remote.Set("ON", new OnCmd(light));
+remote.Set("OFF", new OffCmd(light));
+remote.Press("ON"); // ON
 ```
 
-## Bài toán 3: Task Queue / Job Scheduler
-```javascript
-class Command {
-  execute() {}
+## Bài toán 3: Task Queue
+```csharp
+interface ICommand {
+    void Execute();
 }
 
-class SendEmailCommand extends Command {
-  constructor(email, message) {
-    super();
-    this.email = email;
-    this.message = message;
-  }
-
-  execute() {
-    return `Sending email to ${this.email}: ${this.message}`;
-  }
+class EmailCmd : ICommand {
+    private string email, msg;
+    public EmailCmd(string e, string m) { email = e; msg = m; }
+    public void Execute() => Console.WriteLine($"Email: {msg}");
 }
 
-class ReportCommand extends Command {
-  constructor(reportName) {
-    super();
-    this.reportName = reportName;
-  }
-
-  execute() {
-    return `Generating report: ${this.reportName}`;
-  }
+class Queue {
+    private List<ICommand> tasks = new();
+    public void Add(ICommand cmd) => tasks.Add(cmd);
+    public void Execute() => tasks.ForEach(t => t.Execute());
 }
 
-class TaskQueue {
-  constructor() {
-    this.queue = [];
-  }
-
-  addTask(command) {
-    this.queue.push(command);
-  }
-
-  executeTasks() {
-    while (this.queue.length > 0) {
-      const command = this.queue.shift();
-      console.log(command.execute());
-    }
-  }
-}
-
-const scheduler = new TaskQueue();
-
-scheduler.addTask(new SendEmailCommand("user@example.com", "Welcome!"));
-scheduler.addTask(new ReportCommand("Monthly Sales"));
-scheduler.addTask(new SendEmailCommand("admin@example.com", "New user registered"));
-
-scheduler.executeTasks();
-// Sending email to user@example.com: Welcome!
-// Generating report: Monthly Sales
-// Sending email to admin@example.com: New user registered
+var queue = new Queue();
+queue.Add(new EmailCmd("user", "Hi"));
+queue.Add(new EmailCmd("admin", "Report"));
+queue.Execute();
 ```
