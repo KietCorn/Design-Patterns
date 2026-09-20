@@ -1,7 +1,11 @@
 # 10 Design Pattern (C#) - Bản học thuộc
 
 Mỗi pattern gồm: **định nghĩa ngắn**, **khung cần nhớ**, **3 bài toán** (code cùng một khuôn, chỉ đổi tên).
-Đầu file code nhớ thêm: `using System;` và `using System.Collections.Generic;` (khi dùng `List`, `Dictionary`).
+
+**Quy ước của file này:**
+- Không dùng `Console.WriteLine`. Hàm **trả về chuỗi** (`=> "..."`) nên kiểu trả về là `string`, không phải `void`.
+- Interface và class cài đặt phải **cùng kiểu trả về** (interface `string Sit();` thì class cũng `public string Sit()`).
+- Khi dùng `List` / `Dictionary` nhớ `using System.Collections.Generic;`.
 
 ---
 
@@ -26,7 +30,7 @@ class Logger
         return instance;
     }
 
-    public void Log(string msg) => Console.WriteLine("LOG: " + msg);
+    public string Log(string msg) => "LOG: " + msg;
 }
 ```
 
@@ -68,7 +72,7 @@ class DatabaseConnection
         return instance;
     }
 
-    public void Query(string sql) => Console.WriteLine("Chay: " + sql);
+    public string Query(string sql) => "Chay: " + sql;
 }
 ```
 
@@ -86,9 +90,9 @@ class DatabaseConnection
 **Bài toán:** Gửi thông báo qua Email hoặc SMS theo lựa chọn, không để code khắp nơi tự `new`.
 
 ```csharp
-interface INotification { void Send(string msg); }
-class EmailNotification : INotification { public void Send(string msg) => Console.WriteLine("Email: " + msg); }
-class SmsNotification : INotification { public void Send(string msg) => Console.WriteLine("SMS: " + msg); }
+interface INotification { string Send(string msg); }
+class EmailNotification : INotification { public string Send(string msg) => "Email: " + msg; }
+class SmsNotification : INotification { public string Send(string msg) => "SMS: " + msg; }
 
 class NotificationFactory
 {
@@ -105,9 +109,9 @@ class NotificationFactory
 **Bài toán:** Phần mềm vẽ hình tròn hoặc vuông theo lựa chọn người dùng.
 
 ```csharp
-interface IShape { void Draw(); }
-class Circle : IShape { public void Draw() => Console.WriteLine("Ve hinh tron"); }
-class Square : IShape { public void Draw() => Console.WriteLine("Ve hinh vuong"); }
+interface IShape { string Draw(); }
+class Circle : IShape { public string Draw() => "Ve hinh tron"; }
+class Square : IShape { public string Draw() => "Ve hinh vuong"; }
 
 class ShapeFactory
 {
@@ -124,9 +128,9 @@ class ShapeFactory
 **Bài toán:** Dịch vụ giao hàng chọn xe máy hoặc ô tô tùy đơn hàng.
 
 ```csharp
-interface IVehicle { void Deliver(); }
-class Bike : IVehicle { public void Deliver() => Console.WriteLine("Giao bang xe may"); }
-class Car : IVehicle { public void Deliver() => Console.WriteLine("Giao bang o to"); }
+interface IVehicle { string Deliver(); }
+class Bike : IVehicle { public string Deliver() => "Giao bang xe may"; }
+class Car : IVehicle { public string Deliver() => "Giao bang o to"; }
 
 class VehicleFactory
 {
@@ -153,13 +157,13 @@ class VehicleFactory
 **Bài toán:** Nút và ô tick phải cùng kiểu hệ điều hành, không được trộn nút Windows với ô tick Mac.
 
 ```csharp
-interface IButton { void Draw(); }
-interface ICheckbox { void Draw(); }
+interface IButton { string Draw(); }
+interface ICheckbox { string Draw(); }
 
-class WindowsButton : IButton { public void Draw() => Console.WriteLine("Nut Windows"); }
-class WindowsCheckbox : ICheckbox { public void Draw() => Console.WriteLine("O tick Windows"); }
-class MacButton : IButton { public void Draw() => Console.WriteLine("Nut Mac"); }
-class MacCheckbox : ICheckbox { public void Draw() => Console.WriteLine("O tick Mac"); }
+class WindowsButton : IButton { public string Draw() => "Nut Windows"; }
+class WindowsCheckbox : ICheckbox { public string Draw() => "O tick Windows"; }
+class MacButton : IButton { public string Draw() => "Nut Mac"; }
+class MacCheckbox : ICheckbox { public string Draw() => "O tick Mac"; }
 
 interface IGuiFactory
 {
@@ -184,13 +188,13 @@ class MacFactory : IGuiFactory
 **Bài toán:** Khách chọn phong cách thì ghế và bàn phải cùng phong cách.
 
 ```csharp
-interface IChair { void Sit(); }
-interface ITable { void Put(); }
+interface IChair { string Sit(); }
+interface ITable { string Put(); }
 
-class ModernChair : IChair { public void Sit() => Console.WriteLine("Ghe hien dai"); }
-class ModernTable : ITable { public void Put() => Console.WriteLine("Ban hien dai"); }
-class ClassicChair : IChair { public void Sit() => Console.WriteLine("Ghe co dien"); }
-class ClassicTable : ITable { public void Put() => Console.WriteLine("Ban co dien"); }
+class ModernChair : IChair { public string Sit() => "Ghe hien dai"; }
+class ModernTable : ITable { public string Put() => "Ban hien dai"; }
+class ClassicChair : IChair { public string Sit() => "Ghe co dien"; }
+class ClassicTable : ITable { public string Put() => "Ban co dien"; }
 
 interface IFurnitureFactory
 {
@@ -215,13 +219,13 @@ class ClassicFactory : IFurnitureFactory
 **Bài toán:** Mỗi loại database có bộ kết nối và bộ truy vấn riêng, không được trộn lẫn.
 
 ```csharp
-interface IConnection { void Open(); }
-interface IQuery { void Run(string sql); }
+interface IConnection { string Open(); }
+interface IQuery { string Run(string sql); }
 
-class SqlServerConnection : IConnection { public void Open() => Console.WriteLine("Mo SQL Server"); }
-class SqlServerQuery : IQuery { public void Run(string sql) => Console.WriteLine("SQL Server: " + sql); }
-class PostgresConnection : IConnection { public void Open() => Console.WriteLine("Mo PostgreSQL"); }
-class PostgresQuery : IQuery { public void Run(string sql) => Console.WriteLine("PostgreSQL: " + sql); }
+class SqlServerConnection : IConnection { public string Open() => "Mo SQL Server"; }
+class SqlServerQuery : IQuery { public string Run(string sql) => "SQL Server: " + sql; }
+class PostgresConnection : IConnection { public string Open() => "Mo PostgreSQL"; }
+class PostgresQuery : IQuery { public string Run(string sql) => "PostgreSQL: " + sql; }
 
 interface IDatabaseFactory
 {
@@ -315,16 +319,16 @@ class PizzaBuilder
 **Bài toán:** Giỏ hàng thanh toán bằng thẻ hoặc tiền mặt, thêm cách mới không phải sửa `Cart`.
 
 ```csharp
-interface IPayment { void Pay(int money); }
-class CardPay : IPayment { public void Pay(int money) => Console.WriteLine("Card: " + money); }
-class CashPay : IPayment { public void Pay(int money) => Console.WriteLine("Cash: " + money); }
+interface IPayment { string Pay(int money); }
+class CardPay : IPayment { public string Pay(int money) => "Card: " + money; }
+class CashPay : IPayment { public string Pay(int money) => "Cash: " + money; }
 
 class Cart
 {
     private IPayment strategy;
     public Cart(IPayment s) => strategy = s;
     public void SetPayment(IPayment s) => strategy = s;
-    public void Checkout(int money) => strategy.Pay(money);
+    public string Checkout(int money) => strategy.Pay(money);
 }
 ```
 
@@ -368,7 +372,7 @@ class Shop
 
 **Định nghĩa:** Quan hệ **một-nhiều**: khi Subject thay đổi, tất cả Observer đã đăng ký được **tự động báo**. (Giống đăng ký kênh YouTube.)
 
-**Khung:** `IObserver` có hàm `Update` → Subject có `List<IObserver>` (nhớ `= new List<IObserver>()`), `Subscribe`, `Unsubscribe`, hàm đổi dữ liệu (gán rồi gọi `Notify()`), hàm `Notify()` dùng `foreach` gọi `o.Update(...)` → Observer cụ thể `: IObserver`.
+**Khung:** `IObserver` có hàm `Update` → Subject có `List<IObserver>` (nhớ `= new List<IObserver>()`), `Subscribe`, `Unsubscribe`, hàm đổi dữ liệu (gán rồi gọi `Notify()`), hàm `Notify()` dùng `foreach` gọi `o.Update(...)` → Observer cụ thể `: IObserver`, **lưu dữ liệu nhận được vào field của mình** (hàm `Update` trả về `void`).
 
 ### Ví dụ 1: Giá cổ phiếu
 **Bài toán:** Nhiều nhà đầu tư theo dõi một cổ phiếu, giá đổi thì tự báo cho tất cả.
@@ -393,9 +397,8 @@ class Stock
 
 class Investor : IObserver
 {
-    private string name;
-    public Investor(string n) => name = n;
-    public void Update(int price) => Console.WriteLine(name + ": gia moi " + price);
+    public int Price;
+    public void Update(int p) => Price = p;
 }
 ```
 
@@ -422,9 +425,8 @@ class Channel
 
 class Subscriber : IObserver
 {
-    private string name;
-    public Subscriber(string n) => name = n;
-    public void Update(string video) => Console.WriteLine(name + " nhan: " + video);
+    public string Video;
+    public void Update(string v) => Video = v;
 }
 ```
 
@@ -451,9 +453,8 @@ class WeatherStation
 
 class Display : IObserver
 {
-    private string name;
-    public Display(string n) => name = n;
-    public void Update(int temp) => Console.WriteLine(name + ": " + temp + " do");
+    public int Temp;
+    public void Update(int t) => Temp = t;
 }
 ```
 
@@ -545,14 +546,14 @@ class DrinkDecorator : ITicket
 **Bài toán:** App dùng `IPayment.Pay`, nhưng SDK Momo có hàm `MakeTransaction` kiểu `double`, không sửa được SDK.
 
 ```csharp
-interface IPayment { void Pay(int money); }
-class MomoSdk { public void MakeTransaction(double amount) => Console.WriteLine("Momo: " + amount); }
+interface IPayment { string Pay(int money); }
+class MomoSdk { public string MakeTransaction(double amount) => "Momo: " + amount; }
 
 class MomoAdapter : IPayment
 {
     private MomoSdk momo;
     public MomoAdapter(MomoSdk m) => momo = m;
-    public void Pay(int money) => momo.MakeTransaction(money);
+    public string Pay(int money) => momo.MakeTransaction(money);
 }
 ```
 
@@ -575,14 +576,14 @@ class SensorAdapter : ITemperature
 **Bài toán:** App dùng `IPrinter.Print`, máy in cũ chỉ có hàm `PrintDocument`.
 
 ```csharp
-interface IPrinter { void Print(string text); }
-class OldPrinter { public void PrintDocument(string doc) => Console.WriteLine("In: " + doc); }
+interface IPrinter { string Print(string text); }
+class OldPrinter { public string PrintDocument(string doc) => "In: " + doc; }
 
 class PrinterAdapter : IPrinter
 {
     private OldPrinter printer;
     public PrinterAdapter(OldPrinter p) => printer = p;
-    public void Print(string text) => printer.PrintDocument(text);
+    public string Print(string text) => printer.PrintDocument(text);
 }
 ```
 
@@ -597,16 +598,16 @@ class PrinterAdapter : IPrinter
 **Khung:** interface → đối tượng thật `: Interface` → Proxy `: Interface`, **tự giữ đối tượng thật**, hàm của Proxy có **`if` kiểm tra** rồi mới gọi đối tượng thật.
 
 ### Ví dụ 1: Tải ảnh (Virtual Proxy)
-**Bài toán:** Trang web có nhiều ảnh lớn, chỉ tải ảnh khi thực sự cần hiển thị.
+**Bài toán:** Trang web có nhiều ảnh lớn, chỉ tạo ảnh thật khi thực sự cần hiển thị.
 
 ```csharp
-interface IImage { void Display(); }
+interface IImage { string Display(); }
 
 class RealImage : IImage
 {
     private string file;
-    public RealImage(string f) { file = f; Console.WriteLine("Tai anh: " + f); }
-    public void Display() => Console.WriteLine("Hien thi: " + file);
+    public RealImage(string f) => file = f;
+    public string Display() => "Hien thi: " + file;
 }
 
 class ImageProxy : IImage
@@ -615,10 +616,10 @@ class ImageProxy : IImage
     private RealImage real;
     public ImageProxy(string f) => file = f;
 
-    public void Display()
+    public string Display()
     {
         if (real == null) real = new RealImage(file);
-        real.Display();
+        return real.Display();
     }
 }
 ```
@@ -627,8 +628,8 @@ class ImageProxy : IImage
 **Bài toán:** Báo cáo lương chỉ admin được xem, tách logic bảo mật khỏi class báo cáo.
 
 ```csharp
-interface IReport { void Read(); }
-class SalaryReport : IReport { public void Read() => Console.WriteLine("Noi dung bang luong"); }
+interface IReport { string Read(); }
+class SalaryReport : IReport { public string Read() => "Noi dung bang luong"; }
 
 class ReportProxy : IReport
 {
@@ -636,10 +637,10 @@ class ReportProxy : IReport
     private string role;
     public ReportProxy(string r) => role = r;
 
-    public void Read()
+    public string Read()
     {
-        if (role == "admin") report.Read();
-        else Console.WriteLine("Khong co quyen");
+        if (role == "admin") return report.Read();
+        return "Khong co quyen";
     }
 }
 ```
@@ -649,15 +650,7 @@ class ReportProxy : IReport
 
 ```csharp
 interface IDataService { string GetData(string key); }
-
-class DataService : IDataService
-{
-    public string GetData(string key)
-    {
-        Console.WriteLine("Truy van database: " + key);
-        return "Du lieu " + key;
-    }
-}
+class DataService : IDataService { public string GetData(string key) => "Du lieu " + key; }
 
 class CacheProxy : IDataService
 {
@@ -678,15 +671,15 @@ class CacheProxy : IDataService
 
 **Định nghĩa:** Cung cấp **một interface đơn giản** để dùng cả hệ thống con phức tạp. Client gọi **một hàm** thay vì tự gọi và sắp xếp nhiều class con. (Giống nút "Bắt đầu xem phim" trên remote.)
 
-**Khung:** 3 class con (mỗi class một hàm in ra) → Facade giữ các class con (`private ... = new ...();`) → một hàm public gọi lần lượt các hàm của class con **đúng thứ tự**. Không cần interface.
+**Khung:** 3 class con (mỗi class một hàm trả về `string`) → Facade giữ các class con (`private ... = new ...();`) → một hàm public gọi lần lượt các hàm của class con **đúng thứ tự** và nối kết quả lại. Không cần interface.
 
 ### Ví dụ 1: Rạp chiếu phim tại nhà
 **Bài toán:** Xem phim phải giảm đèn, bật máy chiếu, bật loa đúng thứ tự, gom thành một hàm.
 
 ```csharp
-class Lights { public void Dim() => Console.WriteLine("Den: giam sang"); }
-class Projector { public void On() => Console.WriteLine("May chieu: bat"); }
-class Speaker { public void On() => Console.WriteLine("Loa: bat"); }
+class Lights { public string Dim() => "Den giam sang"; }
+class Projector { public string On() => "May chieu bat"; }
+class Speaker { public string On() => "Loa bat"; }
 
 class HomeTheaterFacade
 {
@@ -694,12 +687,7 @@ class HomeTheaterFacade
     private Projector projector = new Projector();
     private Speaker speaker = new Speaker();
 
-    public void WatchMovie()
-    {
-        lights.Dim();
-        projector.On();
-        speaker.On();
-    }
+    public string WatchMovie() => lights.Dim() + ", " + projector.On() + ", " + speaker.On();
 }
 ```
 
@@ -707,9 +695,9 @@ class HomeTheaterFacade
 **Bài toán:** Đặt hàng gồm kiểm tra kho, thanh toán, giao hàng, gom thành một hàm để nơi nào cũng gọi giống nhau.
 
 ```csharp
-class Inventory { public void Check(string item) => Console.WriteLine("Kho: kiem tra " + item); }
-class Payment { public void Charge(string item) => Console.WriteLine("Thanh toan: " + item); }
-class Shipping { public void Send(string item) => Console.WriteLine("Giao hang: " + item); }
+class Inventory { public string Check(string item) => "Kiem tra kho " + item; }
+class Payment { public string Charge(string item) => "Thanh toan " + item; }
+class Shipping { public string Send(string item) => "Giao hang " + item; }
 
 class OrderFacade
 {
@@ -717,12 +705,7 @@ class OrderFacade
     private Payment payment = new Payment();
     private Shipping shipping = new Shipping();
 
-    public void PlaceOrder(string item)
-    {
-        inventory.Check(item);
-        payment.Charge(item);
-        shipping.Send(item);
-    }
+    public string PlaceOrder(string item) => inventory.Check(item) + ", " + payment.Charge(item) + ", " + shipping.Send(item);
 }
 ```
 
@@ -730,9 +713,9 @@ class OrderFacade
 **Bài toán:** Bật máy cần khởi động CPU, nạp RAM, đọc ổ cứng, người dùng chỉ cần một lệnh `Start`.
 
 ```csharp
-class Cpu { public void Start() => Console.WriteLine("CPU: khoi dong"); }
-class Ram { public void Load() => Console.WriteLine("RAM: nap he dieu hanh"); }
-class HardDrive { public void Read() => Console.WriteLine("O cung: doc du lieu"); }
+class Cpu { public string Start() => "CPU khoi dong"; }
+class Ram { public string Load() => "RAM nap he dieu hanh"; }
+class HardDrive { public string Read() => "O cung doc du lieu"; }
 
 class ComputerFacade
 {
@@ -740,12 +723,7 @@ class ComputerFacade
     private Ram ram = new Ram();
     private HardDrive drive = new HardDrive();
 
-    public void Start()
-    {
-        cpu.Start();
-        ram.Load();
-        drive.Read();
-    }
+    public string Start() => cpu.Start() + ", " + ram.Load() + ", " + drive.Read();
 }
 ```
 
@@ -777,6 +755,7 @@ class ComputerFacade
 
 - Quên `: TênInterface` sau tên class cài đặt.
 - Quên `public` ở hàm cài đặt interface.
+- Interface khai báo `string` mà class cài đặt viết `void` (hoặc ngược lại): **kiểu trả về phải khớp**.
 - Khai báo field bằng **class cụ thể** thay vì **interface** (Strategy, Decorator, Proxy).
 - Quên khởi tạo `List` / `Dictionary` (`= new ...`) hoặc quên `using System.Collections.Generic;`.
 - Decorator quên gọi `inner.Hàm()`, Observer quên gọi `Notify()`.
@@ -791,9 +770,9 @@ class ComputerFacade
 **Khi nào:** đề ghi "Factory Method", hoặc muốn thêm loại mới mà **không sửa** factory cũ.
 
 ```csharp
-interface IDocument { void Open(); }
-class WordDocument : IDocument { public void Open() => Console.WriteLine("Mo Word"); }
-class PdfDocument : IDocument { public void Open() => Console.WriteLine("Mo PDF"); }
+interface IDocument { string Open(); }
+class WordDocument : IDocument { public string Open() => "Mo Word"; }
+class PdfDocument : IDocument { public string Open() => "Mo PDF"; }
 
 interface IDocumentCreator { IDocument CreateDocument(); }
 class WordCreator : IDocumentCreator { public IDocument CreateDocument() => new WordDocument(); }
@@ -833,7 +812,7 @@ class Director
 
 ### C. Observer bằng `event` (ngắn nhất)
 
-**Khi nào:** đề cho phép dùng tính năng có sẵn của C#. Đăng ký bằng `+=`, hủy bằng `-=`. Nếu đề vẽ sơ đồ `Attach/Detach/Notify` thì dùng dạng cổ điển ở mục 6.
+**Khi nào:** đề cho phép dùng tính năng có sẵn của C# (cần `using System;`). Đăng ký bằng `+=`, hủy bằng `-=`. Nếu đề vẽ sơ đồ `Attach/Detach/Notify` thì dùng dạng cổ điển ở mục 6.
 
 ```csharp
 class Order
@@ -845,7 +824,7 @@ class Order
         if (StatusChanged != null) StatusChanged(s);
     }
 }
-// Đăng ký: order.StatusChanged += s => Console.WriteLine("Email: " + s);
+// Đăng ký: order.StatusChanged += OnChanged;   (OnChanged là hàm nhận một string)
 ```
 
 ### D. Class Adapter (dùng kế thừa)
@@ -853,11 +832,11 @@ class Order
 **Khi nào:** đề ghi "Class Adapter" hoặc "dùng kế thừa". Class kế thừa viết **trước**, interface viết **sau** dấu phẩy.
 
 ```csharp
-interface ILogger { void Log(string msg); }
-class OldLogger { public void WriteMessage(string text) => Console.WriteLine("OLD: " + text); }
+interface ILogger { string Log(string msg); }
+class OldLogger { public string WriteMessage(string text) => "OLD: " + text; }
 
 class LoggerAdapter : OldLogger, ILogger
 {
-    public void Log(string msg) => WriteMessage(msg);
+    public string Log(string msg) => WriteMessage(msg);
 }
 ```
