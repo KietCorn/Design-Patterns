@@ -1,4 +1,3 @@
-S
 
 # Factory Pattern
 
