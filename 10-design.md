@@ -1,6 +1,6 @@
 # 10 Design Pattern (C#) - Bản học thuộc
 
-Mỗi pattern gồm: **Mục đích**, **Khi nào dùng**, **Cách sử dụng** (các bước viết code), rồi **3 bài toán** (code cùng một khuôn, chỉ đổi tên).
+Mỗi pattern gồm: **Mục đích**, **Khi nào dùng**, **Cách sử dụng** (tóm tắt chung), rồi **3 bài toán** (code cùng một khuôn, chỉ đổi tên).
 
 **Quy ước của file này:**
 - Không dùng `Console.WriteLine`. Hàm **trả về chuỗi** (`=> "..."`) nên kiểu trả về là `string`, không phải `void`.
@@ -17,11 +17,7 @@ Mỗi pattern gồm: **Mục đích**, **Khi nào dùng**, **Cách sử dụng**
 - Cả hệ thống chỉ cần một đối tượng dùng chung (log, cấu hình, kết nối database)
 - Tạo nhiều đối tượng sẽ gây lệch dữ liệu hoặc tốn tài nguyên
 
-**Cách sử dụng:**
-1. Khai báo biến `private static instance` để giữ đối tượng duy nhất
-2. Để constructor `private` để bên ngoài không tự `new` được
-3. Viết hàm `public static GetInstance()`: chưa có thì tạo, có rồi thì trả về
-4. Nếu chạy nhiều luồng, bọc phần kiểm tra trong `lock`
+**Cách sử dụng:** Cho constructor `private`, dùng một biến `static` giữ đối tượng duy nhất và một hàm `static` để lấy nó ra. Chạy nhiều luồng thì thêm `lock`.
 
 ### Ví dụ 1: Logger
 **Bài toán:** Nhiều nơi cần ghi log, dùng chung một Logger duy nhất để log không rời rạc.
@@ -96,11 +92,7 @@ class DatabaseConnection
 - Có nhiều loại đối tượng cùng interface, loại nào được tạo tùy lựa chọn lúc chạy
 - Muốn tránh `new` lặp ở nhiều nơi và dễ thêm loại mới
 
-**Cách sử dụng:**
-1. Tạo interface chung cho sản phẩm
-2. Viết các class cụ thể cài đặt interface
-3. Viết class `...Factory` có hàm `static Create(string type)`: 2 câu `if` chọn loại và `return new ...`, cuối cùng `return null`
-4. Client gọi `Factory.Create("...")` và chỉ làm việc qua interface
+**Cách sử dụng:** Tạo interface cho sản phẩm và các class cụ thể. Viết một Factory nhận tên loại và trả về đúng đối tượng. Client chỉ gọi Factory, không tự `new`.
 
 ### Ví dụ 1: Notification
 **Bài toán:** Gửi thông báo qua Email hoặc SMS theo lựa chọn, không để code khắp nơi tự `new`.
@@ -171,12 +163,7 @@ class VehicleFactory
 - Có nhiều họ sản phẩm (Windows/Mac, Hiện đại/Cổ điển), mỗi họ gồm nhiều loại sản phẩm
 - Các sản phẩm phải cùng họ, không được trộn lẫn
 
-**Cách sử dụng:**
-1. Tạo một interface cho mỗi loại sản phẩm (A, B)
-2. Viết sản phẩm cụ thể cho từng họ: họ 1 (A1, B1), họ 2 (A2, B2)
-3. Tạo interface factory có **nhiều hàm Create** (`CreateA()`, `CreateB()`)
-4. Mỗi họ một factory cụ thể, `return new` các sản phẩm của họ mình
-5. Client chọn một factory, rồi lấy mọi sản phẩm từ factory đó
+**Cách sử dụng:** Tạo interface cho từng loại sản phẩm, rồi các sản phẩm cụ thể theo từng họ. Mỗi họ có một factory tạo cả bộ sản phẩm. Client chọn factory rồi lấy sản phẩm từ đó.
 
 ### Ví dụ 1: Giao diện Windows / Mac
 **Bài toán:** Nút và ô tick phải cùng kiểu hệ điều hành, không được trộn nút Windows với ô tick Mac.
@@ -281,12 +268,7 @@ class PostgresFactory : IDatabaseFactory
 - Đối tượng có nhiều thành phần, trong đó có thành phần tùy chọn
 - Muốn code tạo đối tượng dễ đọc, không sợ nhầm thứ tự tham số
 
-**Cách sử dụng:**
-1. Viết class sản phẩm với các trường `public`
-2. Viết class builder, giữ một sản phẩm bên trong (`= new ...`)
-3. Mỗi thành phần một hàm `SetXxx`: gán giá trị rồi `return this;` (kiểu trả về là **tên class builder**, không phải `void`)
-4. Viết hàm `Build()` trả về sản phẩm
-5. Client gọi nối tiếp `.SetA(...).SetB(...).Build()`
+**Cách sử dụng:** Viết Builder có các hàm gán từng thành phần (mỗi hàm trả về chính builder để gọi nối tiếp) và hàm `Build()` trả về sản phẩm hoàn chỉnh. Client gọi từng bước rồi `Build()`.
 
 ### Ví dụ 1: Computer
 **Bài toán:** Máy tính có nhiều linh kiện, lắp từng linh kiện theo tên cho dễ đọc, không nhầm thứ tự.
@@ -351,11 +333,7 @@ class PizzaBuilder
 - Một việc có nhiều cách thực hiện (thanh toán, tính phí, giảm giá)
 - Muốn thay `if-else` / `switch` dài bằng các class riêng, dễ thêm cách mới
 
-**Cách sử dụng:**
-1. Tạo interface chung có một hàm
-2. Viết mỗi cách làm thành một class cài đặt interface
-3. Viết Context gồm 4 dòng: field kiểu **interface**, constructor nhận strategy, hàm `Set...` để đổi, hàm gọi `strategy.Hàm(...)`
-4. Client chọn strategy đưa vào Context, muốn đổi thì gọi `Set...`
+**Cách sử dụng:** Tạo interface chung và cài đặt nhiều strategy khác nhau. Context giữ một strategy và gọi qua interface. Client chọn strategy đưa vào Context, muốn đổi thì đặt strategy khác.
 
 ### Ví dụ 1: Thanh toán
 **Bài toán:** Giỏ hàng thanh toán bằng thẻ hoặc tiền mặt, thêm cách mới không phải sửa `Cart`.
@@ -418,12 +396,7 @@ class Shop
 - Một đối tượng đổi thì nhiều đối tượng khác cần cập nhật theo (giá cổ phiếu, video mới, thời tiết)
 - Subject không nên biết chi tiết từng người nhận
 
-**Cách sử dụng:**
-1. Tạo `IObserver` có hàm `Update`
-2. Viết Subject có `List<IObserver>` (nhớ `= new List<IObserver>()`), hàm `Subscribe` và `Unsubscribe`
-3. Hàm đổi dữ liệu: gán giá trị rồi gọi `Notify()`. Hàm `Notify()` dùng `foreach` gọi `o.Update(...)`
-4. Viết observer cụ thể `: IObserver`, lưu dữ liệu nhận được vào field của mình (`Update` trả về `void`)
-5. Client đăng ký observer bằng `Subscribe`
+**Cách sử dụng:** Subject giữ danh sách observer, có hàm đăng ký và hủy đăng ký. Khi dữ liệu đổi, Subject duyệt danh sách và báo cho từng observer. Observer cài đặt interface chung để nhận tin.
 
 ### Ví dụ 1: Giá cổ phiếu
 **Bài toán:** Nhiều nhà đầu tư theo dõi một cổ phiếu, giá đổi thì tự báo cho tất cả.
@@ -521,12 +494,7 @@ class Display : IObserver
 - Cần thêm chức năng tùy chọn và kết hợp tự do (sữa, đường, phô mai...)
 - Dùng kế thừa sẽ phải tạo quá nhiều class cho từng tổ hợp
 
-**Cách sử dụng:**
-1. Tạo interface chung
-2. Viết đối tượng gốc cài đặt interface
-3. Viết mỗi decorator `: Interface`, có field giữ một `Interface` bên trong và constructor nhận đối tượng bên trong
-4. Hàm của decorator gọi `inner.Hàm()` **rồi cộng thêm** phần của mình
-5. Client bọc chồng: `new Vo2(new Vo1(new Goc()))`
+**Cách sử dụng:** Tạo interface chung cho đối tượng gốc và các decorator. Mỗi decorator giữ một đối tượng cùng interface, gọi nó rồi thêm chức năng của mình. Client bọc chồng các decorator tùy ý.
 
 ### Ví dụ 1: Cà phê
 **Bài toán:** Thêm sữa, đường tùy khách, không muốn tạo class cho mọi tổ hợp.
@@ -604,12 +572,7 @@ class DrinkDecorator : ITicket
 - Tích hợp thư viện, SDK bên ngoài hoặc code cũ có tên hàm hay kiểu dữ liệu không khớp
 - Không sửa được class gốc, hoặc không muốn sửa code đang dùng
 
-**Cách sử dụng:**
-1. Xác định interface **Target** mà client mong đợi
-2. Giữ nguyên class **Adaptee** có sẵn (tên hàm khác Target)
-3. Viết Adapter `: Target`, có field giữ Adaptee và constructor nhận Adaptee
-4. Hàm của Target trong Adapter gọi hàm của Adaptee (có thể kèm đổi dữ liệu)
-5. Client chỉ làm việc qua Target
+**Cách sử dụng:** Viết Adapter cài đặt interface mà client mong đợi, bên trong giữ class có sẵn và gọi nó để "dịch" sang interface đó. Client chỉ làm việc qua interface, không biết class cũ.
 
 ### Ví dụ 1: Cổng thanh toán Momo
 **Bài toán:** App dùng `IPayment.Pay`, nhưng SDK Momo có hàm `MakeTransaction` kiểu `double`, không sửa được SDK.
@@ -668,12 +631,7 @@ class PrinterAdapter : IPrinter
 - Đối tượng thật tốn tài nguyên, chỉ muốn tạo khi cần (lazy)
 - Cần kiểm tra quyền hoặc lưu kết quả (cache) trước khi gọi đối tượng thật
 
-**Cách sử dụng:**
-1. Tạo interface chung
-2. Viết đối tượng thật cài đặt interface
-3. Viết Proxy `: Interface`, **tự giữ** đối tượng thật (tạo sẵn hoặc tạo khi cần)
-4. Hàm của Proxy kiểm tra điều kiện bằng `if` rồi mới gọi đối tượng thật
-5. Client dùng Proxy như dùng đối tượng thật, không nhận ra sự khác biệt
+**Cách sử dụng:** Tạo interface chung cho đối tượng thật và Proxy. Proxy giữ đối tượng thật, kiểm tra điều kiện (chưa tạo, đủ quyền, đã có cache...) rồi mới gọi nó. Client dùng Proxy như dùng đối tượng thật.
 
 ### Ví dụ 1: Tải ảnh (Virtual Proxy)
 **Bài toán:** Trang web có nhiều ảnh lớn, chỉ tạo ảnh thật khi thực sự cần hiển thị.
@@ -753,11 +711,7 @@ class CacheProxy : IDataService
 - Một tác vụ phải gọi nhiều class con theo đúng thứ tự
 - Muốn client chỉ gọi một hàm, không cần biết chi tiết bên trong
 
-**Cách sử dụng:**
-1. Viết các class con, mỗi class một việc nhỏ
-2. Viết class Facade, giữ các class con (`private ... = new ...();`)
-3. Viết hàm public gọi lần lượt các hàm của class con đúng thứ tự (không cần interface)
-4. Client chỉ gọi hàm của Facade
+**Cách sử dụng:** Viết một class Facade giữ các class con, gom nhiều bước thành vài hàm đơn giản, gọi các class con đúng thứ tự. Client chỉ gọi Facade.
 
 ### Ví dụ 1: Rạp chiếu phim tại nhà
 **Bài toán:** Xem phim phải giảm đèn, bật máy chiếu, bật loa đúng thứ tự, gom thành một hàm.
